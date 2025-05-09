@@ -1,0 +1,61 @@
+# application.yml
+server:
+  port: 8090
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: account-auth-route
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+        - id: account-service-route
+          uri: lb://ACCOUNTSERVICE
+          predicates:
+            - Path=/api/account/**
+          filters:
+            - StripPrefix=1
+        - id: exchange-service-route
+          uri: lb://EXCHANGESERVICE
+          predicates:
+            - Path=/api/exchange/**
+          filters:
+            - StripPrefix=0
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - http://127.0.0.1:3000
+              - http://localhost:3000
+            allowedMethods: 
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+    fetch-registry: true
+    register-with-eureka: true
+  instance:
+    preferIpAddress: true
+jwt:
+  issuer-uri: http://account-service:8081
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
+
+logging:
+  level:
+    com.apigateway: DEBUG
+    org.springframework.cloud.gateway: INFO
+    org.springframework.security: DEBUG
+    com.apigateway.filter.JwtCookieToHeaderFilter: DEBUG
+

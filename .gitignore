@@ -1,0 +1,27 @@
+# Environment variables
+.env
+**/.env
+**/.env.*
+
+# Logs
+**/logs/
+**/*.log
+
+# Build artifacts
+**/target/
+**/build/
+**/.next/
+**/node_modules/
+**/dist/
+
+# IDE files
+**/.idea/
+**/.vscode/
+**/*.iml
+
+# Docker volumes
+**/data/
+
+# Secrets
+**/*secret*
+**/*credentials*

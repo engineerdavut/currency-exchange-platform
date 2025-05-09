@@ -1,0 +1,17 @@
+# src/test/resources/application.yml
+jwt:
+  secret: TestSuperSecretKeyThatIsAtLeast32BytesLongForTesting123
+  expiration: 86400000
+api:
+  layer:
+    key: TestApiKeyForTesting
+    url: https://api.apilayer.com/exchangerates_data/latest
+  exchangerate:
+    key: TestApiKeyForTesting
+    url: https://v6.exchangerate-api.com/v6/
+  collectapi:
+    key: TestApiKeyForTesting
+    url: https://api.collectapi.com/
+  security:
+    key: TestApiKeyForTesting
+    secret: TestApiKeyForTesting

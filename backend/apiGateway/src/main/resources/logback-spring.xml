@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Spring Boot'nun temel logback konfigürasyonunu dahil et -->
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    
+    <!-- API Gateway için özel loglama -->
+    <logger name="com.apigateway" level="DEBUG"/>
+    <logger name="org.springframework.cloud.gateway" level="INFO"/>
+    <logger name="org.springframework.security" level="INFO"/>
+
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/api-gateway.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/api-gateway-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Gateway filtre ve rota logları için özel yapılandırma -->
+    <logger name="org.springframework.cloud.gateway.filter" level="DEBUG"/>
+    <logger name="org.springframework.cloud.gateway.route" level="DEBUG"/>
+    
+    <root level="INFO">
+        <appender-ref ref="FILE"/>
+    </root>
+</configuration>

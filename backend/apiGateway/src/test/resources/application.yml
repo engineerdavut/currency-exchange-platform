@@ -1,0 +1,4 @@
+# src/test/resources/application.yml
+jwt:
+  secret: TestSuperSecretKeyThatIsAtLeast32BytesLongForTesting123
+  expiration: 86400000

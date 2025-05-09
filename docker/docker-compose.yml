@@ -1,0 +1,255 @@
+services:
+  # -------------------------------
+  # POSTGRES CONTAINER
+  # -------------------------------
+    # Account Service Database
+  account-db:
+    image: postgres:14
+    container_name: account_db
+    environment:
+      POSTGRES_USER: ${ACCOUNT_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${ACCOUNT_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${ACCOUNT_POSTGRES_DB}
+    volumes:
+      - account_data:/var/lib/postgresql/data
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Exchange Service Database
+  exchange-db:
+    image: postgres:14
+    container_name: exchange_db
+    environment:
+      POSTGRES_USER: ${EXCHANGE_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${EXCHANGE_POSTGRES_PASSWORD}
+      POSTGRES_DB: ${EXCHANGE_POSTGRES_DB}
+    volumes:
+      - exchange_data:/var/lib/postgresql/data
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------
+  # RABBITMQ
+  # -------------------------------
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------
+  # EUREKA SERVER
+  # -------------------------------
+  eureka-server:
+    image: steeltoeoss/eureka-server
+    container_name: eureka_server
+    ports:
+      - "8761:8761"
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health", "||", "exit", "1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------
+  # ACCOUNT SERVICE
+  # -------------------------------
+  account-service:
+    build: ../backend/accountService/accountService
+    container_name: account_service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://account-db:5432/${ACCOUNT_POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${ACCOUNT_POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${ACCOUNT_POSTGRES_PASSWORD}
+      SPRING_RABBITMQ_HOST: ${RABBITMQ_HOST}
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URI}
+      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_ORIGINS: '"http://localhost:3000"'
+      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_METHODS: '"GET,POST,PUT,DELETE,OPTIONS"'
+      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_HEADERS: '"*"'
+      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOW_CREDENTIALS: '"true"'
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+    ports:
+      - "8081:8081"
+    depends_on:
+      account-db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8081/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------
+  # EXCHANGE SERVICE
+  # -------------------------------
+  exchange-service:
+    build: ../backend/exchangeService/exchangeService
+    container_name: exchange_service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://exchange-db:5432/${EXCHANGE_POSTGRES_DB}
+      SPRING_DATASOURCE_USERNAME: ${EXCHANGE_POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${EXCHANGE_POSTGRES_PASSWORD}
+      SPRING_RABBITMQ_HOST: ${RABBITMQ_HOST}
+      SPRING_RABBITMQ_PORT: ${RABBITMQ_PORT}
+      SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER}
+      SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URI}
+      API_SECURITY_KEY: ${API_SECURITY_KEY}
+      API_SECURITY_SECRET: ${API_SECURITY_SECRET}
+      EXCHANGE_API_LAYER_KEY: ${EXCHANGE_API_LAYER_KEY}
+      EXCHANGE_API_LAYER_URL: ${EXCHANGE_API_LAYER_URL}
+      EXCHANGE_EXCHANGERATE_KEY: ${EXCHANGE_EXCHANGERATE_KEY}
+      EXCHANGE_EXCHANGERATE_URL: ${EXCHANGE_EXCHANGERATE_URL}
+      EXCHANGE_COLLECTAPI_KEY: ${EXCHANGE_COLLECTAPI_KEY}
+      EXCHANGE_COLLECTAPI_URL: ${EXCHANGE_COLLECTAPI_URL}
+    ports:
+      - "8082:8082"
+    depends_on:
+      exchange-db:
+        condition: service_healthy
+      eureka-server:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 20s
+      timeout: 15s
+      retries: 5
+  # -------------------------------
+  # API GATEWAY
+  # -------------------------------
+
+
+  # -------------------------------
+  # NEXT.JS FRONTEND
+  # -------------------------------
+  web-frontend:
+    build:
+      context: ../fttech-exchange-app-frontend
+      args:
+        NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: http://localhost/api/auth
+        NEXT_PUBLIC_ACCOUNT_BASE_URL: http://localhost/api/account
+        NEXT_PUBLIC_EXCHANGE_SERVICE_URL: http://localhost/api/exchange
+    container_name: web_frontend
+    environment:
+      NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: http://localhost/api/auth
+      NEXT_PUBLIC_ACCOUNT_BASE_URL: http://localhost/api/account
+      NEXT_PUBLIC_EXCHANGE_SERVICE_URL: http://localhost/api/exchange
+    depends_on:
+      - account-service
+      - exchange-service
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------
+  # NGINX GATEWAY
+  # -------------------------------
+  api-gateway:
+    build: ../backend/apiGateway
+    container_name: api_gateway
+    environment:
+      SERVER_ADDRESS: 0.0.0.0
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SPRING_APPLICATION_NAME: api-gateway
+    ports:
+      # Nginx içinden 8080 portunu kullanacak
+      - "8090:8090"
+    depends_on:
+      eureka-server:
+        condition: service_started
+      account-service:
+        condition: service_started
+      exchange-service:
+        condition: service_started
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  nginx:
+    build: ./nginx
+    container_name: nginx_gateway
+    ports:
+      - "80:80"  
+    depends_on:
+      api-gateway:
+        condition: service_started
+      web-frontend:
+        condition: service_started
+    environment:
+      - API_GATEWAY_URL=http://api-gateway:8090
+    networks:
+      - banking-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+# Docker volumes
+volumes:
+  account_data:
+    driver: local
+  exchange_data:
+    driver: local
+  
+
+# Docker network
+networks:
+  banking-net:
+    driver: bridge
