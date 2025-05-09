@@ -223,7 +223,6 @@ public class ExchangeService {
         try {
             balanceResponse = rabbitMQListener.getBalanceResponse(correlationId, 10000);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         
