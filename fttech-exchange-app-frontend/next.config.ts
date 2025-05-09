@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-
+  /*
   async rewrites() {
     return [
       {
@@ -24,9 +24,11 @@ const nextConfig = {
       {
         source: '/api/:path*',
         destination: 'http://localhost:8090/api/:path*'
+        // destination: 'http://api-gateway:8090/api/:path*'
       },
     ];
   },
+  */
 };
 
 module.exports = nextConfig;

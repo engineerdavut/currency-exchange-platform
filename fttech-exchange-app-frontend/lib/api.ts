@@ -13,7 +13,7 @@ if (!API_BASE_URL) {
 }
 
 const api = axios.create({
-  baseURL: API_BASE_URL || 'http://localhost:8090/api', // Fallback sadece son çare olmalı
+  baseURL: API_BASE_URL,// || 'http://localhost:8090/api', // Fallback sadece son çare olmalı
   withCredentials: true,
   headers: {
     'X-Requested-With': 'XMLHttpRequest'
