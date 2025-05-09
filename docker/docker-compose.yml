@@ -93,7 +93,7 @@ services:
       SPRING_RABBITMQ_USERNAME: ${RABBITMQ_USER}
       SPRING_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URI}
-      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_ORIGINS: '"http://localhost:3000"'
+      SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_ORIGINS: '"${CORS_ALLOWED_ORIGINS}"'
       SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_METHODS: '"GET,POST,PUT,DELETE,OPTIONS"'
       SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOWED_HEADERS: '"*"'
       SPRING_SECURITY_CORS_CONFIGURATIONS___[/**]_ALLOW_CREDENTIALS: '"true"'
@@ -169,14 +169,16 @@ services:
     build:
       context: ../fttech-exchange-app-frontend
       args:
-        NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: http://localhost/api/auth
-        NEXT_PUBLIC_ACCOUNT_BASE_URL: http://localhost/api/account
-        NEXT_PUBLIC_EXCHANGE_SERVICE_URL: http://localhost/api/exchange
+        NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: ${NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL}
+        NEXT_PUBLIC_ACCOUNT_BASE_URL: ${NEXT_PUBLIC_ACCOUNT_BASE_URL}
+        NEXT_PUBLIC_EXCHANGE_SERVICE_URL: ${NEXT_PUBLIC_EXCHANGE_SERVICE_URL}
     container_name: web_frontend
     environment:
-      NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: http://localhost/api/auth
-      NEXT_PUBLIC_ACCOUNT_BASE_URL: http://localhost/api/account
-      NEXT_PUBLIC_EXCHANGE_SERVICE_URL: http://localhost/api/exchange
+      NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: ${NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL}
+      NEXT_PUBLIC_ACCOUNT_BASE_URL: ${NEXT_PUBLIC_ACCOUNT_BASE_URL}
+      NEXT_PUBLIC_EXCHANGE_SERVICE_URL: ${NEXT_PUBLIC_EXCHANGE_SERVICE_URL}
+      NEXT_PUBLIC_TEST_URL: ${NEXT_PUBLIC_TEST_URL}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     depends_on:
       - account-service
       - exchange-service
@@ -229,8 +231,6 @@ services:
         condition: service_started
       web-frontend:
         condition: service_started
-    environment:
-      - API_GATEWAY_URL=http://api-gateway:8090
     networks:
       - banking-net
     restart: unless-stopped
