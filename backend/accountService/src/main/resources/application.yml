@@ -1,0 +1,42 @@
+spring:
+  application:
+    name: accountService
+  datasource:
+    url: jdbc:postgresql://account-db:5432/${ACCOUNT_POSTGRES_DB}
+    username: ${ACCOUNT_POSTGRES_USER}
+    password: ${ACCOUNT_POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+
+server:
+  port: 8081
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    instance-id: ${spring.application.name}:${spring.cloud.client.hostname}
+    prefer-ip-address: false 
+    hostname: account-service 
+
+logging:
+  level:
+    '[com.netflix.discovery]': WARN
+    '[org.springframework.cloud.netflix.eureka]': WARN
+    '[com.netflix.eureka]': WARN
+    '[com.accountservice.service.impl.AuthServiceImpl]': DEBUG
+    '[com.accountservice.security.JwtTokenProvider]': DEBUG
+    '[com.accountservice.controller.AccountController]': DEBUG
+jwt:
+  secret: ${JWT_SECRET} 
+  expiration: ${JWT_EXPIRATION}

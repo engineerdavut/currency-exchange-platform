@@ -12,7 +12,7 @@ import java.util.List;
 @Configuration
 public class CorsConfig {
 
-    @Value("${CORS_ALLOWED_ORIGINS}") // .env'den değeri almak için
+    @Value("${cors.allowedOrigins}") // .env'den değeri almak için
     private String allowedOriginsFromEnv;
 
     @Bean
@@ -25,7 +25,7 @@ public class CorsConfig {
             config.setAllowedOrigins(List.of(allowedOriginsFromEnv));
         } else {
             // Fallback veya hata fırlatma
-            config.setAllowedOrigins(List.of("https://exchangeplatform.hacigodavutaktas.online")); // Güvenli bir varsayılan
+            config.setAllowedOrigins(List.of(allowedOriginsFromEnv)); // Güvenli bir varsayılan
             // Veya geliştirme için: config.setAllowedOrigins(List.of("http://localhost:3000"));
         }
 

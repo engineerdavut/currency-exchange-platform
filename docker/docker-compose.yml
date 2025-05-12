@@ -82,7 +82,9 @@ services:
   # ACCOUNT SERVICE
   # -------------------------------
   account-service:
-    build: ../backend/accountService/accountService
+    build:
+      context: ../backend  # <<< DEĞİŞTİ: Artık context ana backend klasörü
+      dockerfile: accountService/Dockerfile
     container_name: account_service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://account-db:5432/${ACCOUNT_POSTGRES_DB}
@@ -121,7 +123,9 @@ services:
   # EXCHANGE SERVICE
   # -------------------------------
   exchange-service:
-    build: ../backend/exchangeService/exchangeService
+    build:
+      context: ../backend # <<< DEĞİŞTİ
+      dockerfile: exchangeService/Dockerfile # <<< DEĞİŞTİ
     container_name: exchange_service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://exchange-db:5432/${EXCHANGE_POSTGRES_DB}
@@ -168,6 +172,7 @@ services:
   web-frontend:
     build:
       context: ../fttech-exchange-app-frontend
+      dockerfile: Dockerfile
       args:
         #NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL: ${NEXT_PUBLIC_ACCOUNT_AUTH_SERVICE_URL}
         #NEXT_PUBLIC_ACCOUNT_BASE_URL: ${NEXT_PUBLIC_ACCOUNT_BASE_URL}
@@ -199,11 +204,14 @@ services:
   # NGINX GATEWAY
   # -------------------------------
   api-gateway:
-    build: ../backend/apiGateway
+    build:
+      context: ../backend # <<< DEĞİŞTİ
+      dockerfile: apiGateway/Dockerfile # <<< DEĞİŞTİ: apiGateway klasöründeki Dockerfile
     container_name: api_gateway
     environment:
       SERVER_ADDRESS: 0.0.0.0
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      CORS_ALLOWED_ORIGINS_FROM_ENV_FOR_JAVA_CONFIG: ${CORS_ALLOWED_ORIGINS_FROM_ENV_FOR_JAVA_CONFIG}
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: ${EUREKA_URI}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
@@ -227,10 +235,12 @@ services:
       timeout: 5s
       retries: 5
   nginx:
-    build: ./nginx
+    build:
+      context: ./nginx 
+      dockerfile: Dockerfile
     container_name: nginx_gateway
     ports:
-      - "8080:80"  
+      - "80:80"  
     depends_on:
       api-gateway:
         condition: service_started

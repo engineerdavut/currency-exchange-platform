@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { exchangeApi } from '../lib/api'; // Doğru import
 import { ExchangeRequest, ExchangeResponse } from '../types/exchange'; // Doğru import
-// import { getUsername } from '../utils/tokenUtils'; // KALDIRILDI
+import axios from 'axios';
 
 export const useCurrencyExchange = () => {
   const [result, setResult] = useState<ExchangeResponse | null>(null);
@@ -44,11 +44,21 @@ export const useCurrencyExchange = () => {
       const response = await exchangeApi.processExchange(request); // API çağrısı
       setResult(response.data);
       return response.data as ExchangeResponse; // Başarılı sonucu döndür
-    } catch (err: any) {
-      const errorMessage = err.response?.data?.message || err.message || 'Exchange failed. Please try again.';
+    } catch (err: unknown) {
+      let errorMessage: string;
+      if (axios.isAxiosError(err)) {
+        // Axios error: pull server-side message if present
+        errorMessage = err.response?.data?.message || err.message;
+      } else if (err instanceof Error) {
+        // Generic JS Error
+        errorMessage = err.message;
+      } else {
+        // Something totally unexpected
+        errorMessage = 'Exchange failed. Please try again.';
+      }
       setError(errorMessage);
       // Return null or an error object
-      return { status: 'FAILED', message: errorMessage } as ExchangeResponse; // Hata objesi döndür
+      return { status: 'FAILED', message: errorMessage } as ExchangeResponse;
     } finally {
       setIsLoading(false);
     }

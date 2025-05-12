@@ -2,7 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  /*
+  /* Build sırasında api'lerin yönlendirilmesi için.
+  Production ortamında kaldırılacak.
   async rewrites() {
     return [
       {
@@ -23,8 +24,8 @@ const nextConfig = {
       },
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8090/api/:path*'
-        // destination: 'http://api-gateway:8090/api/:path*'
+        // destination: 'http://localhost:8090/api/:path*'
+        destination: 'http://api-gateway:8090/api/:path*'
       },
     ];
   },

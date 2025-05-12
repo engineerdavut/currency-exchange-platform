@@ -2,3 +2,10 @@
 jwt:
   secret: TestSuperSecretKeyThatIsAtLeast32BytesLongForTesting123
   expiration: 86400000
+
+cors:
+  allowedOrigins: "http://localhost:3000"
+
+eureka:
+  client:
+    enabled: false

@@ -37,11 +37,12 @@ export default function ExchangeForm({ onSubmit, isLoading }: ExchangeFormProps)
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="flex flex-col space-y-4 md:flex-row md:space-y-0 md:space-x-4">
         <div className="flex-1">
-          <label className="block mb-1 text-gray-700 font-medium">From</label>
+          <label htmlFor="fromCurrencySelect" className="block mb-1 text-gray-700 font-medium">From</label>
           <select 
-              className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800" 
-              value={fromCurrency} 
-              onChange={(e) => setFromCurrency(e.target.value)}
+            id="fromCurrencySelect"
+            className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800" 
+            value={fromCurrency} 
+            onChange={(e) => setFromCurrency(e.target.value)}
             >
             <option value="TRY">Turkish Lira (TRY)</option>
             <option value="USD">US Dollar (USD)</option>
@@ -64,8 +65,9 @@ export default function ExchangeForm({ onSubmit, isLoading }: ExchangeFormProps)
         </div>
         
         <div className="flex-1">
-          <label className="block mb-1 text-gray-700 font-medium">To</label>
+          <label htmlFor="toCurrencySelect" className="block mb-1 text-gray-700 font-medium">To</label>
           <select 
+            id="toCurrencySelect"
             className="border p-2 rounded w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800" 
             value={toCurrency} 
             onChange={(e) => setToCurrency(e.target.value)}

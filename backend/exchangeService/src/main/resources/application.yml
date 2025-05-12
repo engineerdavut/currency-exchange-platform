@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: exchangeService
+  datasource:
+    url: jdbc:postgresql://exchange-db:5432/${EXCHANGE_POSTGRES_DB}
+    username: ${EXCHANGE_POSTGRES_USER}
+    password: ${EXCHANGE_POSTGRES_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
+    password: ${RABBITMQ_PASSWORD}
+
+server:
+  port: 8082
+api:
+  layer:
+    key: ${EXCHANGE_API_LAYER_KEY}
+    url: ${EXCHANGE_API_LAYER_URL}
+  exchangerate:
+    key: ${EXCHANGE_EXCHANGERATE_KEY}
+    url: ${EXCHANGE_EXCHANGERATE_URL}
+  collectapi:
+    key: ${EXCHANGE_COLLECTAPI_KEY}
+    url: ${EXCHANGE_COLLECTAPI_URL}
+  security:
+    key: ${API_SECURITY_KEY}
+    secret: ${API_SECURITY_SECRET}
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_URI}
+    registerWithEureka: true
+    fetchRegistry: true
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: false 
+    hostname: exchange-service 
+logging:
+  level:
+    '[com.netflix.eureka]': WARN
+    '[org.springframework.cloud.netflix.eureka]': INFO
+    '[com.netflix.discovery]': DEBUG

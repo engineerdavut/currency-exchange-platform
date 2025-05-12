@@ -2,14 +2,18 @@ package com.apigateway.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.io.UnsupportedEncodingException; 
 
 @Component
 public class JwtCookieToHeaderFilter implements GlobalFilter, Ordered {
@@ -17,7 +21,7 @@ public class JwtCookieToHeaderFilter implements GlobalFilter, Ordered {
     
     private final JwtTokenValidator jwtValidator;
     
-    @Autowired
+    //@Autowired
     public JwtCookieToHeaderFilter(JwtTokenValidator jwtValidator) {
         this.jwtValidator = jwtValidator;
     }
@@ -36,28 +40,45 @@ public class JwtCookieToHeaderFilter implements GlobalFilter, Ordered {
         String username = jwtValidator.validateAndExtractUser(exchange.getRequest());
         
         if (username != null) {
-            logger.debug("[JwtCookieToHeader] Adding X-User header: {}", username);
-            
-            return chain.filter(exchange.mutate().request(
-                exchange.getRequest().mutate()
-                    .header("X-User", username)
-                    .build()
-            ).build());
+            try {
+                // *** DEĞİŞİKLİK BAŞLANGICI ***
+                String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
+                logger.debug("[JwtCookieToHeader] Original username: {}, Encoded username for X-User header: {}", username, encodedUsername);
+
+                ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+                        .header("X-User", encodedUsername) // Encode edilmiş kullanıcı adını ekle
+                        .build();
+                // *** DEĞİŞİKLİK SONU ***
+                
+                return chain.filter(exchange.mutate().request(mutatedRequest).build());
+
+            } catch (UnsupportedEncodingException e) {
+                // Bu hata StandardCharsets.UTF_8 ile normalde oluşmaz
+                logger.error("[JwtCookieToHeader] Error URL encoding username: {}", username, e);
+                // Hata durumunda 500 döndürmek veya isteği reddetmek daha güvenli olabilir.
+                // Şimdilik isteği olduğu gibi devam ettiriyoruz ama bu, karakter bozulmasına neden olabilir.
+                // Daha iyi bir yaklaşım:
+                // exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+                // return exchange.getResponse().setComplete();
+                // VEYA sadece logla ve devam et (şu anki davranış):
+                return chain.filter(exchange); 
+            }
         }
         
         // Korumalı yol ve geçerli token yoksa 401 dön
         if (isProtectedPath(path)) {
+            logger.warn("[JwtCookieToHeader] Protected path {} accessed without valid JWT. Responding with UNAUTHORIZED.", path);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
-        logger.debug("[JwtCookieToHeader] no JWT cookie present");
+        logger.debug("[JwtCookieToHeader] No JWT cookie present for path: {}", path);
         return chain.filter(exchange);
     }
     
     @Override
     public int getOrder() {
-        return Ordered.HIGHEST_PRECEDENCE;
+        return Ordered.HIGHEST_PRECEDENCE+10;
     }
     
     private boolean isProtectedPath(String path) {
