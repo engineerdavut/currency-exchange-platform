@@ -6,7 +6,7 @@
 		<groupId>com.exchangeplatform</groupId>
 		<artifactId>exchangeplatform-banking-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath> <!-- apiGateway/pom.xml'den backend/pom.xml'e doğru -->
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>apiGateway</artifactId>
@@ -65,19 +65,7 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-        <!-- API Gateway'de RabbitMQ gereksizse kaldırılabilir -->
-		<!--<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.amqp</groupId>
-			<artifactId>spring-rabbit-test</artifactId>
-			<scope>test</scope>
-		</dependency>-->
 	</dependencies>
-
-	<!-- dependencyManagement'i parent'tan miras alır, buraya tekrar eklemeye gerek yok -->
 
 	<build>
 		<plugins>

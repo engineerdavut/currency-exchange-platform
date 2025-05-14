@@ -1,13 +1,12 @@
 package com.accountservice.security;
 
 import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException; // Specific exception
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-// import io.jsonwebtoken.SignatureAlgorithm; // DEPRECATED, kaldırıldı
-import io.jsonwebtoken.UnsupportedJwtException; // Specific exception
-import io.jsonwebtoken.MalformedJwtException; // Specific exception// Eğer anahtarı dinamik oluşturuyorsanız (örneğin testlerde)
-import io.jsonwebtoken.security.SignatureException; // Specific exception
-import io.jsonwebtoken.security.SecureDigestAlgorithm; // Yeni imza algoritması arayüzü
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -23,16 +22,15 @@ public class JwtTokenProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
-    private final SecretKey key; // Bu SecretKey'in HMAC SHA algoritmaları için uygun olması gerekir
+    private final SecretKey key;
 
     @Value("${jwt.expiration}")
-    private long jwtExpirationMs; // Milisaniye cinsinden olduğunu varsayıyorum
+    private long jwtExpirationMs;
 
     public JwtTokenProvider(SecretKey key) {
         this.key = key;
-        logger.debug("AccountService JwtTokenProvider initialized with SecretKey object hash: {}", System.identityHashCode(key));
-        // Anahtarın algoritmasını ve formatını loglamak da faydalı olabilir
-        // logger.debug("SecretKey Algorithm: {}, Format: {}", key.getAlgorithm(), key.getFormat());
+        logger.debug("AccountService JwtTokenProvider initialized with SecretKey object hash: {}",
+                System.identityHashCode(key));
     }
 
     public String generateToken(String username) {
@@ -41,26 +39,13 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
-        // JJWT 0.12.x ile uyumlu builder ve imzalama
-        // SecureDigestAlgorithm'ı SecretKey'e uygun olarak seçmeliyiz.
-        // SecretKey'iniz Keys.hmacShaKeyFor ile oluşturulduysa, HS256, HS384, HS512 uygundur.
-        // Varsayılan olarak anahtarınızın HS256 için uygun olduğunu varsayalım.
-        SecureDigestAlgorithm<SecretKey, SecretKey> signatureAlgorithm = Jwts.SIG.HS256; // VEYA Jwts.SIG.get().get(key.getAlgorithm())
-                                                                                       // VEYA anahtarınızın oluşturulma şekline göre doğru algoritma
-
-        // Eğer anahtarınızın algoritmasını biliyorsanız (örn: "HmacSHA256") ve buna uygun bir SecureDigestAlgorithm almak istiyorsanız:
-        // SecureDigestAlgorithm<?, ?> signatureAlgorithm = Jwts.SIG.get().forKey(key);
-        // Veya spesifik olarak:
-        // if (! (key instanceof javax.crypto.spec.SecretKeySpec && key.getAlgorithm().startsWith("HmacSHA"))) {
-        //     logger.warn("The provided key is not an HMAC SHA key, default HS256 might not be appropriate.");
-        // }
-
+        SecureDigestAlgorithm<SecretKey, SecretKey> signatureAlgorithm = Jwts.SIG.HS256;
 
         String token = Jwts.builder()
-                .subject(username) // Deprecated olmayan metot
-                .issuedAt(now)     // Deprecated olmayan metot
-                .expiration(expiryDate) // Deprecated olmayan metot
-                .signWith(key, signatureAlgorithm) // Deprecated olmayan imzalama metodu
+                .subject(username)
+                .issuedAt(now)
+                .expiration(expiryDate)
+                .signWith(key, signatureAlgorithm)
                 .compact();
 
         String tokenStart = token.substring(0, Math.min(token.length(), 15));
@@ -71,19 +56,19 @@ public class JwtTokenProvider {
 
     public String getUsernameFromToken(String token) {
         try {
-            Claims claims = Jwts.parser() // parserBuilder() yerine parser() kullanılabilir (0.12.x'te)
-                    .verifyWith(key) // setSigningKey yerine verifyWith (daha güvenli)
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
                     .build()
-                    .parseSignedClaims(token) // parseClaimsJws yerine parseSignedClaims
+                    .parseSignedClaims(token)
                     .getPayload();
-            
+
             return claims.getSubject();
         } catch (ExpiredJwtException e) {
             logger.warn("JWT token is expired: {}", e.getMessage());
-            throw e; // Veya özel bir exception
+            throw e;
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
-            throw e; // Veya özel bir exception
+            throw e;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
             throw e;
@@ -99,9 +84,9 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
             logger.debug("[JwtTokenProvider] validateToken: valid");
             return true;
         } catch (ExpiredJwtException e) {
@@ -114,7 +99,7 @@ public class JwtTokenProvider {
             logger.error("Unsupported JWT token during validation: {}", e.getMessage());
         } catch (IllegalArgumentException e) {
             logger.error("JWT claims string is empty during validation: {}", e.getMessage());
-        } catch (Exception e) { // Diğer beklenmedik hatalar için genel bir catch
+        } catch (Exception e) {
             logger.error("[JwtTokenProvider] validateToken: invalid due to an unexpected error", e);
         }
         return false;

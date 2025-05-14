@@ -1,7 +1,6 @@
-// src/hooks/useCurrencyExchange.ts (Güncellenmiş)
 import { useState } from 'react';
-import { exchangeApi } from '../lib/api'; // Doğru import
-import { ExchangeRequest, ExchangeResponse } from '../types/exchange'; // Doğru import
+import { exchangeApi } from '../lib/api';
+import { ExchangeRequest, ExchangeResponse } from '../types/exchange';
 import axios from 'axios';
 
 export const useCurrencyExchange = () => {
@@ -9,7 +8,6 @@ export const useCurrencyExchange = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // executeExchange artık username'i parametre olarak alıyor
   const executeExchange = async (
     formData: {
       fromCurrency: string;
@@ -17,47 +15,43 @@ export const useCurrencyExchange = () => {
       amount: string;
       transactionType: string;
     },
-    username: string | undefined // Username parametresi eklendi
+    username: string | undefined
   ) => {
     setIsLoading(true);
     setError(null);
-    setResult(null); // Önceki sonucu temizle
+    setResult(null);
 
-    if (!username) { // Username kontrolü
+    if (!username) {
       setError('User not authenticated');
       setIsLoading(false);
-      // Return null or throw error, depending on how you want to handle in the component
-      return null; // Veya bir hata objesi döndür
+
+      return null;
     }
 
     try {
       const { fromCurrency, toCurrency, amount, transactionType } = formData;
 
-      const request: ExchangeRequest = { // Tam ExchangeRequest tipini kullan
-        username, // Parametreden gelen username
+      const request: ExchangeRequest = {
+        username,
         fromCurrency,
         toCurrency,
-        amount: parseFloat(amount), // amount'u number yap
+        amount: parseFloat(amount),
         transactionType,
       };
 
-      const response = await exchangeApi.processExchange(request); // API çağrısı
+      const response = await exchangeApi.processExchange(request);
       setResult(response.data);
-      return response.data as ExchangeResponse; // Başarılı sonucu döndür
+      return response.data as ExchangeResponse;
     } catch (err: unknown) {
       let errorMessage: string;
       if (axios.isAxiosError(err)) {
-        // Axios error: pull server-side message if present
         errorMessage = err.response?.data?.message || err.message;
       } else if (err instanceof Error) {
-        // Generic JS Error
         errorMessage = err.message;
       } else {
-        // Something totally unexpected
         errorMessage = 'Exchange failed. Please try again.';
       }
       setError(errorMessage);
-      // Return null or an error object
       return { status: 'FAILED', message: errorMessage } as ExchangeResponse;
     } finally {
       setIsLoading(false);

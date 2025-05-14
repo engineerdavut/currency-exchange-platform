@@ -17,7 +17,6 @@ spring:
 server:
   port: 8081
 
-
 eureka:
   client:
     serviceUrl:
@@ -26,17 +25,17 @@ eureka:
     fetchRegistry: true
   instance:
     instance-id: ${spring.application.name}:${spring.cloud.client.hostname}
-    prefer-ip-address: false 
-    hostname: account-service 
+    prefer-ip-address: false
+    hostname: account-service
 
 logging:
   level:
-    '[com.netflix.discovery]': WARN
-    '[org.springframework.cloud.netflix.eureka]': WARN
-    '[com.netflix.eureka]': WARN
-    '[com.accountservice.service.impl.AuthServiceImpl]': DEBUG
-    '[com.accountservice.security.JwtTokenProvider]': DEBUG
-    '[com.accountservice.controller.AccountController]': DEBUG
+    "[com.netflix.discovery]": WARN
+    "[org.springframework.cloud.netflix.eureka]": WARN
+    "[com.netflix.eureka]": WARN
+    "[com.accountservice.service.impl.AuthServiceImpl]": DEBUG
+    "[com.accountservice.security.JwtTokenProvider]": DEBUG
+    "[com.accountservice.controller.AccountController]": DEBUG
 jwt:
-  secret: ${JWT_SECRET} 
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}

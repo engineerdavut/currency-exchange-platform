@@ -1,5 +1,3 @@
-// src/main/java/com/accountservice/service/impl/AuthServiceImpl.java
-// src/main/java/com/accountservice/service/impl/AuthServiceImpl.java
 package com.accountservice.service.impl;
 
 import com.accountservice.dto.*;
@@ -37,8 +35,8 @@ public class AuthServiceImpl implements AuthService {
     private final AccountRepository accountRepository;
 
     public AuthServiceImpl(UserRepository userRepository,
-                           JwtTokenProvider jwtTokenProvider,
-                           AccountRepository accountRepository) {
+            JwtTokenProvider jwtTokenProvider,
+            AccountRepository accountRepository) {
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.accountRepository = accountRepository;
@@ -62,20 +60,21 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDto loginAndSetCookies(LoginRequestDto loginRequest,
-                                               HttpServletResponse response) {
+            HttpServletResponse response) {
         logger.debug("[AuthService] loginAndSetCookies() request={}", loginRequest);
         String username = authenticate(loginRequest);
 
-        boolean prod =false;
+        boolean prod = false;
         String token = jwtTokenProvider.generateToken(username);
-        logger.debug("[AuthService] loginAndSetCookies: generated token for cookie: {}", token.substring(0, 15) + "...");
+        logger.debug("[AuthService] loginAndSetCookies: generated token for cookie: {}",
+                token.substring(0, 15) + "...");
         ResponseCookie jwtCookie = ResponseCookie.from("jwt", token)
-            .path("/")
-            .httpOnly(true)
-            .secure(prod)                         // prod’da true, yerelde false
-            .sameSite(prod ? "None" : "Lax")      // prod’da cross‑site için None, yerelde Lax yeterli
-            .maxAge(Duration.ofHours(1))
-            .build();
+                .path("/")
+                .httpOnly(true)
+                .secure(prod)
+                .sameSite(prod ? "None" : "Lax")
+                .maxAge(Duration.ofHours(1))
+                .build();
         logger.debug("[AuthService] loginAndSetCookies: setting cookie {}", jwtCookie);
         response.addHeader(HttpHeaders.SET_COOKIE, jwtCookie.toString());
         return new LoginResponseDto(username);
@@ -83,55 +82,48 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    @Transactional // Kayıt işlemini transactional yapalım
+    @Transactional
     public void register(RegisterRequestDto registerRequest) {
         logger.debug("[AuthService] register() username={}", registerRequest.getUsername());
 
-        // 1. Kullanıcı adı zaten var mı kontrol et
         if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
             logger.warn("[AuthService] register: user already exists {}", registerRequest.getUsername());
-            // Kullanıcıya daha anlaşılır bir hata mesajı döndürmek için özel exception fırlatabiliriz.
             throw new RegistrationException("Username '" + registerRequest.getUsername() + "' is already taken.");
         }
 
-        // 2. Yeni User entity'si oluştur
         User newUser = new User();
         newUser.setUsername(registerRequest.getUsername());
-        // !!! Güvenlik: Şifre mutlaka hashlenmeli! PasswordEncoder bean'i inject edilip kullanılmalı.
-        // newUser.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-        newUser.setPassword(registerRequest.getPassword()); // <<< GEÇİCİ - MUTLAKA ŞİFRELEME EKLE!
+        newUser.setPassword(registerRequest.getPassword());
         logger.info("[AuthService] register: Creating new user {}", newUser.getUsername());
 
-        // 3. Kullanıcıyı kaydet
         User savedUser = userRepository.save(newUser);
         logger.info("[AuthService] register: User saved successfully with ID: {}", savedUser.getId());
 
-        
-        for(CurrencyType currency : CurrencyType.values()) {
+        for (CurrencyType currency : CurrencyType.values()) {
             createInitialAccount(savedUser, currency);
         }
 
         logger.info("[AuthService] register: Initial accounts created for user {}", savedUser.getUsername());
     }
 
-    // Yardımcı metot: Başlangıç hesabı oluşturma
     private void createInitialAccount(User user, CurrencyType currency) {
-         Account account = new Account();
-         account.setUser(user);
-         account.setCurrencyType(currency);
-         account.setBalance(BigDecimal.ZERO); // Başlangıç bakiyesi 0
-         accountRepository.save(account);
-         logger.debug("[AuthService] createInitialAccount: Created {} account for user {}", currency, user.getUsername());
+        Account account = new Account();
+        account.setUser(user);
+        account.setCurrencyType(currency);
+        account.setBalance(BigDecimal.ZERO);
+        accountRepository.save(account);
+        logger.debug("[AuthService] createInitialAccount: Created {} account for user {}", currency,
+                user.getUsername());
     }
 
     @Override
     public void logout(HttpServletResponse response) {
         logger.debug("[AuthService] logout()");
         ResponseCookie deleteJwt = ResponseCookie.from("jwt", "")
-            .path("/")
-            .httpOnly(true)
-            .maxAge(0)
-            .build();
+                .path("/")
+                .httpOnly(true)
+                .maxAge(0)
+                .build();
         logger.debug("[AuthService] logout: clearing cookie {}", deleteJwt);
         response.addHeader(HttpHeaders.SET_COOKIE, deleteJwt.toString());
     }
@@ -139,8 +131,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public boolean validateAuthToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
-        logger.debug("[AuthService] validateAuthToken: cookies={}", cookies == null ? "null" : Arrays.toString(cookies));
-        if (cookies == null) return false;
+        logger.debug("[AuthService] validateAuthToken: cookies={}",
+                cookies == null ? "null" : Arrays.toString(cookies));
+        if (cookies == null)
+            return false;
         for (Cookie c : cookies) {
             logger.debug("[AuthService] validateAuthToken: cookie name={} value={}", c.getName(), c.getValue());
             if ("jwt".equals(c.getName())) {
@@ -153,4 +147,3 @@ public class AuthServiceImpl implements AuthService {
         return false;
     }
 }
-

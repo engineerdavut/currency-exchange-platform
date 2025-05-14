@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Spring Boot'nun temel logback konfigürasyonunu dahil et -->
+
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
     
-    <!-- API Gateway için özel loglama -->
     <logger name="com.apigateway" level="DEBUG"/>
     <logger name="org.springframework.cloud.gateway" level="INFO"/>
     <logger name="org.springframework.security" level="INFO"/>
@@ -22,7 +21,6 @@
         </encoder>
     </appender>
     
-    <!-- Gateway filtre ve rota logları için özel yapılandırma -->
     <logger name="org.springframework.cloud.gateway.filter" level="DEBUG"/>
     <logger name="org.springframework.cloud.gateway.route" level="DEBUG"/>
     

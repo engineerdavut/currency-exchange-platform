@@ -1,9 +1,8 @@
-// components/transactions/TransactionList.tsx
-import React from 'react';
-import { Transaction } from '../../types/transaction';
-import TransactionItem from './TransactionItem';
-import { Loading } from '../common/Loading';
-import { ErrorMessage } from '../common/ErrorMessage';
+import React from "react";
+import { Transaction } from "../../types/transaction";
+import TransactionItem from "./TransactionItem";
+import { Loading } from "../common/Loading";
+import { ErrorMessage } from "../common/ErrorMessage";
 
 interface TransactionListProps {
   transactions: Transaction[];
@@ -17,10 +16,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   transactions,
   isLoading = false,
   error = null,
-  className = '',
-  showCurrencyFilter = true
+  className = "",
+  showCurrencyFilter = true,
 }) => {
-  const [selectedCurrency, setSelectedCurrency] = React.useState('ALL');
+  const [selectedCurrency, setSelectedCurrency] = React.useState("ALL");
   if (isLoading) {
     return <Loading size="md" className="mx-auto my-8" />;
   }
@@ -37,9 +36,8 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     );
   }
 
-
   const filteredTransactions = transactions.filter((transaction) => {
-    if (selectedCurrency === 'ALL') return true;
+    if (selectedCurrency === "ALL") return true;
     return transaction.currencyType === selectedCurrency;
   });
 
@@ -51,7 +49,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
     <div className={`space-y-3 ${className}`}>
       {showCurrencyFilter && (
         <div className="currency-filter">
-          <label htmlFor="currencySelect" className="mr-2 font-medium text-gray-700">
+          <label
+            htmlFor="currencySelect"
+            className="mr-2 font-medium text-gray-700"
+          >
             Filter by Currency:
           </label>
           <select
@@ -64,11 +65,10 @@ export const TransactionList: React.FC<TransactionListProps> = ({
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
             <option value="GBP">GBP</option>
-            {/* Add more currency options as needed */}
           </select>
         </div>
       )}
-      
+
       {filteredTransactions.map((transaction) => (
         <TransactionItem
           key={transaction.transactionId}

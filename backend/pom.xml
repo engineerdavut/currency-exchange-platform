@@ -16,8 +16,8 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <spring-boot.version>3.4.5</spring-boot.version> <!-- GÜNCEL STABİL SÜRÜM KULLANIN, 3.4.2 henüz yok -->
-        <spring-cloud.version>2024.0.1</spring-cloud.version> <!-- Spring Boot 3.2.x ile uyumlu -->
+        <spring-boot.version>3.4.5</spring-boot.version>
+        <spring-cloud.version>2024.0.1</spring-cloud.version>
         <jjwt.version>0.12.6</jjwt.version>
         <springdoc.version>2.8.6</springdoc.version>
         <unirest.version>4.4.6</unirest.version>
@@ -25,14 +25,13 @@
         <mockito.junit.jupiter.version>5.17.0</mockito.junit.jupiter.version>
         <jakarta.servlet.version>6.1.0</jakarta.servlet.version>
         <slf4j.version>2.0.17</slf4j.version>
-        <lombok.version>1.18.38</lombok.version> <!-- Lombok versiyonunu ekledim -->
+        <lombok.version>1.18.38</lombok.version>
     </properties>
 
     <modules>
-        <!-- Modül yolları parent POM'a göre relative olmalı -->
         <module>accountService</module>
         <module>exchangeService</module>
-        <module>apiGateway</module> <!-- apiGateway'in kendi klasöründe olduğunu varsayıyorum -->
+        <module>apiGateway</module>
     </modules>
 
     <dependencyManagement>
@@ -53,7 +52,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>commonUtils</artifactId> <!-- artifactId'yi commonUtils olarak düzelttim -->
+                <artifactId>commonUtils</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -101,11 +100,11 @@
                 <artifactId>slf4j-api</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
-             <dependency> <!-- Lombok için dependencyManagement -->
+             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-                <scope>provided</scope> <!-- Genellikle provided scope'unda olur -->
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -128,7 +127,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version> <!-- Güncel versiyon -->
+                    <version>3.13.0</version>
                     <configuration>
                         <release>${java.version}</release>
                         <parameters>true</parameters>

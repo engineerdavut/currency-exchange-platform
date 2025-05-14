@@ -31,8 +31,7 @@ class ExchangeControllerTest {
     private ExchangeController exchangeController;
 
     @Test
-    void processExchange_SetsUsernameAndCallsService() throws Exception {  // Exception eklendi
-        // Arrange
+    void processExchange_SetsUsernameAndCallsService() throws Exception { 
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setFromCurrency("TRY");
         request.setToCurrency("USD");
@@ -50,15 +49,12 @@ class ExchangeControllerTest {
         when(exchangeService.processExchange(anyString(), any(ExchangeRequestDto.class)))
             .thenReturn(expectedResponse);
         
-        // Act
         ResponseEntity<ExchangeResponseDto> responseEntity = 
             exchangeController.processExchange(username, request);
         
-        // Assert
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertSame(expectedResponse, responseEntity.getBody());
         
-        // Verify username was set on the request
         verify(exchangeService).processExchange(eq(username), argThat(req -> 
             username.equals(req.getUsername()) &&
             "TRY".equals(req.getFromCurrency()) &&

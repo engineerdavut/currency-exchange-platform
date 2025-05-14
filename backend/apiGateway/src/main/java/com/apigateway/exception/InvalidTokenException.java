@@ -1,4 +1,3 @@
-// InvalidTokenException.java
 package com.apigateway.exception;
 
 public class InvalidTokenException extends RuntimeException {

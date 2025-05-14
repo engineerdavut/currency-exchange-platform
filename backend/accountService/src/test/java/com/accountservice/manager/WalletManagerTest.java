@@ -27,20 +27,16 @@ public class WalletManagerTest {
 
     @Test
     void getWallet_ShouldReturnAccountInfo() {
-        // Arrange
+
         String username = "testUser";
         List<AccountInfoDto> expectedWallet = Arrays.asList(
-            new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
-            new AccountInfoDto(2L, "USD", new BigDecimal("100"))
-        );
+                new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
+                new AccountInfoDto(2L, "USD", new BigDecimal("100")));
         when(accountService.getAccountInfo(username)).thenReturn(expectedWallet);
 
-        // Act
         List<AccountInfoDto> result = walletManager.getWallet(username);
 
-        // Assert
         assertEquals(expectedWallet, result);
         verify(accountService).getAccountInfo(username);
     }
 }
-

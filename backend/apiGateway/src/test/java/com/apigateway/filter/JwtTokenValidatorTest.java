@@ -3,15 +3,14 @@ package com.apigateway.filter;
 import com.apigateway.exception.InvalidTokenException;
 import com.apigateway.exception.TokenExpiredException;
 import io.jsonwebtoken.Jwts;
-// import io.jsonwebtoken.SignatureAlgorithm; // DEPRECATED
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SecureDigestAlgorithm; // YENİ IMPORT
+import io.jsonwebtoken.security.SecureDigestAlgorithm; 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpCookie;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest; // reactive ServerHttpRequest için
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest; 
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -28,24 +27,23 @@ class JwtTokenValidatorTest {
     private SecretKey testSecretKey;
     private final String TEST_USERNAME = "testuser";
     private final String JWT_COOKIE_NAME = "jwt";
-    private SecureDigestAlgorithm<SecretKey, SecretKey> signatureAlgorithm; // JJWT 0.12.x için
+    private SecureDigestAlgorithm<SecretKey, SecretKey> signatureAlgorithm;
 
     @BeforeEach
     void setUp() {
         String secretString = "testSecretKeyThatIsAtLeast32BytesLongForHS256ApiGateway";
         testSecretKey = Keys.hmacShaKeyFor(secretString.getBytes(StandardCharsets.UTF_8));
         jwtTokenValidator = new JwtTokenValidator(testSecretKey);
-        signatureAlgorithm = Jwts.SIG.HS256; // Anahtarımıza uygun algoritma
+        signatureAlgorithm = Jwts.SIG.HS256; 
     }
 
-    // Helper method to generate a test token (JJWT 0.12.x uyumlu)
     private String generateTestToken(String username, Instant expirationTime, SecretKey signingKey) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .subject(username)                // Yeni API
-                .issuedAt(Date.from(now))       // Yeni API
-                .expiration(Date.from(expirationTime)) // Yeni API
-                .signWith(signingKey, signatureAlgorithm) // Yeni API
+                .subject(username)                
+                .issuedAt(Date.from(now))      
+                .expiration(Date.from(expirationTime)) 
+                .signWith(signingKey, signatureAlgorithm)
                 .compact();
     }
 
@@ -87,7 +85,6 @@ class JwtTokenValidatorTest {
                 .cookie(new HttpCookie(JWT_COOKIE_NAME, tokenWithWrongSignature))
                 .build();
 
-        // JwtTokenValidator'ın içindeki catch blokları SignatureException'ı InvalidTokenException'a çeviriyor
         assertThrows(InvalidTokenException.class, () -> {
             jwtTokenValidator.validateAndExtractUser(request);
         }, "Expected InvalidTokenException for wrong signature");

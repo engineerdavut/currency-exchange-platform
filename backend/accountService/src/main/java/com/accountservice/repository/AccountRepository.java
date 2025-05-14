@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUserAndCurrencyType(User user, CurrencyType currencyType);
+
     List<Account> findByUser(User user);
 }
-

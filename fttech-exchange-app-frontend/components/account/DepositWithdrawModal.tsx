@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
+import React, { useState } from "react";
+import { Modal } from "../common/Modal";
+import { Button } from "../common/Button";
 
 interface DepositWithdrawModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (amount: string) => void;
-  type: 'deposit' | 'withdraw';
+  type: "deposit" | "withdraw";
   currencyType: string;
   isLoading: boolean;
 }
@@ -17,9 +17,9 @@ export const DepositWithdrawModal: React.FC<DepositWithdrawModalProps> = ({
   onSubmit,
   type,
   currencyType,
-  isLoading
+  isLoading,
 }) => {
-  const [amount, setAmount] = useState('');
+  const [amount, setAmount] = useState("");
 
   const handleSubmit = () => {
     const numericAmount = Number(amount);
@@ -30,7 +30,7 @@ export const DepositWithdrawModal: React.FC<DepositWithdrawModalProps> = ({
   };
 
   const resetAndClose = () => {
-    setAmount('');
+    setAmount("");
     onClose();
   };
 
@@ -38,13 +38,23 @@ export const DepositWithdrawModal: React.FC<DepositWithdrawModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={resetAndClose}
-      title={`${type === 'deposit' ? 'Deposit' : 'Withdraw'} - ${currencyType}`}
+      title={`${type === "deposit" ? "Deposit" : "Withdraw"} - ${currencyType}`}
       footer={
         <>
-          <Button variant="primary" onClick={handleSubmit} isLoading={isLoading} className="mr-4">
+          <Button
+            variant="primary"
+            onClick={handleSubmit}
+            isLoading={isLoading}
+            className="mr-4"
+          >
             Confirm
           </Button>
-          <Button variant="secondary" onClick={resetAndClose} disabled={isLoading}className="mr-4">
+          <Button
+            variant="secondary"
+            onClick={resetAndClose}
+            disabled={isLoading}
+            className="mr-4"
+          >
             Cancel
           </Button>
         </>

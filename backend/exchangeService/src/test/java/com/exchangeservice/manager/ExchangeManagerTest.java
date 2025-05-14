@@ -25,7 +25,7 @@ class ExchangeManagerTest {
 
     @Test
     void processExchange_ShouldDelegateToExchangeService() throws Exception {
-        // Arrange
+
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setFromCurrency("TRY");
@@ -39,10 +39,10 @@ class ExchangeManagerTest {
 
         when(exchangeService.processExchange("testUser",request)).thenReturn(expectedResponse);
 
-        // Act
+
         ExchangeResponseDto actualResponse = exchangeManager.processExchange("testUser",request);
 
-        // Assert
+
         assertEquals(expectedResponse, actualResponse);
         verify(exchangeService).processExchange("testUser",request);
     }

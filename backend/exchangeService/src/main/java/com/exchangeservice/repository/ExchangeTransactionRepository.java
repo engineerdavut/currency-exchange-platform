@@ -6,5 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ExchangeTransactionRepository extends JpaRepository<ExchangeTransaction, Long> {
-    // Additional query methods can be defined here if needed.
 }

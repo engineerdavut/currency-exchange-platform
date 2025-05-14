@@ -51,7 +51,6 @@ public class APILayerManager implements PriceManager {
 
     @Override
     public BigDecimal getExchangeRate(String fromCurrency, String toCurrency) throws Exception {
-        // GOLD para birimi için özel işleme
         if (fromCurrency.equals("GOLD") || toCurrency.equals("GOLD")) {
             return handleGoldExchangeRate(fromCurrency, toCurrency);
         }
@@ -74,7 +73,6 @@ public class APILayerManager implements PriceManager {
     private BigDecimal handleGoldExchangeRate(String fromCurrency, String toCurrency) throws Exception {
         try {
             if (fromCurrency.equals("GOLD")) {
-                // GOLD -> para birimi dönüşümü (altın satışı)
                 HttpResponse<String> response = Unirest.get(apiUrl)
                     .header("apikey", apiKey)
                     .queryString("base", "XAU")
@@ -83,12 +81,10 @@ public class APILayerManager implements PriceManager {
                 
                 JSONObject json = new JSONObject(response.getBody());
                 BigDecimal ounceRate = json.getJSONObject("rates").getBigDecimal(toCurrency);
-                // Ons fiyatını gram fiyatına çevir (1 ons = 31.1034768 gram)
                 BigDecimal gramRate = ounceRate.divide(OUNCE_TO_GRAM, 6, RoundingMode.HALF_UP);
                 logger.info("GOLD to {}: 1 gram = {} {}", toCurrency, gramRate, toCurrency);
                 return gramRate;
             } else {
-                // Para birimi -> GOLD dönüşümü (altın alımı)
                 HttpResponse<String> response = Unirest.get(apiUrl)
                     .header("apikey", apiKey)
                     .queryString("base", fromCurrency)
@@ -97,12 +93,8 @@ public class APILayerManager implements PriceManager {
                 
                 JSONObject json = new JSONObject(response.getBody());
                 BigDecimal ounceRate = json.getJSONObject("rates").getBigDecimal("XAU");
-                // 1 para birimi kaç ons altın alır hesapla
-                // Sonra gram cinsinden hesapla (1 ons = 31.1034768 gram)
                 BigDecimal gramPerCurrency = ounceRate.multiply(OUNCE_TO_GRAM);
                 logger.info("{} to GOLD: 1 {} = {} gram", fromCurrency, fromCurrency, gramPerCurrency);
-                
-                // 1 para birimi / 1 gram altın = kur
                 return BigDecimal.ONE.divide(gramPerCurrency, 6, RoundingMode.HALF_UP);
             }
         } catch (Exception e) {
@@ -114,17 +106,14 @@ public class APILayerManager implements PriceManager {
 
     @Override
     public ExchangeRateInfo getExchangeRateInfo(String fromCurrency, String toCurrency) throws Exception {
-        // GOLD para birimi için özel işleme
         if (fromCurrency.equals("GOLD") || toCurrency.equals("GOLD")) {
             BigDecimal rate;
             OperationType operationType;
             
             if (fromCurrency.equals("GOLD")) {
-                // GOLD -> diğer para birimleri
                 rate = handleGoldExchangeRate(fromCurrency, toCurrency);
                 operationType = OperationType.MULTIPLY;
             } else {
-                // Diğer para birimleri -> GOLD
                 rate = handleGoldExchangeRate(fromCurrency, toCurrency);
                 operationType = OperationType.DIVIDE;
             }
@@ -132,20 +121,17 @@ public class APILayerManager implements PriceManager {
             return new ExchangeRateInfo(rate, operationType);
         }
         
-        // Normal para birimleri için
         BigDecimal rate = getExchangeRate(fromCurrency, toCurrency);
         
-        // USD/TRY gibi büyük değerli kurlar için çarpma
         if (fromCurrency.equals("USD") && toCurrency.equals("TRY") || 
             fromCurrency.equals("EUR") && toCurrency.equals("TRY")) {
             return new ExchangeRateInfo(rate, OperationType.MULTIPLY);
         }
-        // TRY/USD gibi küçük değerli kurlar için bölme
+
         else if (toCurrency.equals("USD") && fromCurrency.equals("TRY") || 
                  toCurrency.equals("EUR") && fromCurrency.equals("TRY")) {
             return new ExchangeRateInfo(getExchangeRate(toCurrency, fromCurrency), OperationType.DIVIDE);
         }
-        // Diğer durumlar için
         else {
             return new ExchangeRateInfo(rate, OperationType.MULTIPLY);
         }

@@ -13,9 +13,8 @@ public class WalletManager {
     @Autowired
     private AccountService accountService;
 
-    // Kullanıcının tüm hesap bakiyelerini getirir
     public List<AccountInfoDto> getWallet(String username) {
-        // Bu örnekte, mevcut getAccountInfo metodu tüm hesapları döndürdüğü varsayılıyor.
+
         return accountService.getAccountInfo(username);
     }
 }

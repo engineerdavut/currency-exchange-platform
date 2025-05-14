@@ -1,4 +1,4 @@
-package com.apigateway.config; // Paket adını kendi yapına göre düzelt
+package com.apigateway.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ public class SecurityConfig {
             .formLogin(formLogin -> formLogin.disable())
             .authorizeExchange(ex -> ex
                 .pathMatchers("/api/auth/**").permitAll()
-                .anyExchange().permitAll() // Yetkilendirme JwtCookieToHeaderFilter'a bırakıldı
+                .anyExchange().permitAll()
             )
             .build();
     }

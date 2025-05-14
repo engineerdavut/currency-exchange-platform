@@ -68,13 +68,11 @@ public class ExchangeIntegrationTest {
     
     @BeforeEach
     void setUp() {
-        // Test öncesi transaction repository'yi temizle
         transactionRepository.deleteAll();
     }
     
     @Test
     void processExchange_CurrencyExchange_Success() throws Exception {
-        // Arrange
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setAccountId(1L);
@@ -83,18 +81,15 @@ public class ExchangeIntegrationTest {
         request.setAmount(new BigDecimal("1000"));
         request.setTransactionType("BUY");
         
-        // Mock exchange rate info
         ExchangeRateInfo rateInfo = new ExchangeRateInfo(
             new BigDecimal("28.5"), OperationType.DIVIDE);
         when(currencyPriceManager.getExchangeRateInfo("TRY", "USD"))
             .thenReturn(rateInfo);
         
-        // Mock balance check response
         BalanceCheckResponseDto balanceResponse = new BalanceCheckResponseDto(true);
         when(rabbitMQListener.getBalanceResponse(anyString(), anyLong()))
             .thenReturn(balanceResponse);
         
-        // Act
         MvcResult result = mockMvc.perform(post("/api/exchange/process")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User", "testUser")
@@ -105,7 +100,6 @@ public class ExchangeIntegrationTest {
                 .andExpect(jsonPath("$.toCurrency").value("USD"))
                 .andReturn();
         
-        // Assert
         String responseContent = result.getResponse().getContentAsString();
         ExchangeResponseDto response = objectMapper.readValue(responseContent, ExchangeResponseDto.class);
         
@@ -113,7 +107,6 @@ public class ExchangeIntegrationTest {
         assertEquals(new BigDecimal("28.5"), response.getExecutedPrice());
         assertEquals(new BigDecimal("35.09").setScale(2, RoundingMode.HALF_UP), response.getToAmount());
         
-        // Verify transaction was saved in the database
         List<ExchangeTransaction> transactions = transactionRepository.findAll();
         assertEquals(1, transactions.size());
         
@@ -127,7 +120,6 @@ public class ExchangeIntegrationTest {
     
     @Test
     void processExchange_GoldPurchase_Success() throws Exception  {
-        // Arrange
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setAccountId(1L);
@@ -136,18 +128,15 @@ public class ExchangeIntegrationTest {
         request.setAmount(new BigDecimal("30000"));
         request.setTransactionType("BUY");
         
-        // Mock exchange rate info for gold
         ExchangeRateInfo rateInfo = new ExchangeRateInfo(
             new BigDecimal("2500"), OperationType.DIVIDE);
         when(goldPriceManager.getExchangeRateInfo("TRY", "GOLD"))
             .thenReturn(rateInfo);
         
-        // Mock balance check response
         BalanceCheckResponseDto balanceResponse = new BalanceCheckResponseDto(true);
         when(rabbitMQListener.getBalanceResponse(anyString(), anyLong()))
             .thenReturn(balanceResponse);
         
-        // Act
         MvcResult result = mockMvc.perform(post("/api/exchange/process")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User", "testUser")
@@ -158,7 +147,6 @@ public class ExchangeIntegrationTest {
                 .andExpect(jsonPath("$.toCurrency").value("GOLD"))
                 .andReturn();
         
-        // Assert
         String responseContent = result.getResponse().getContentAsString();
         ExchangeResponseDto response = objectMapper.readValue(responseContent, ExchangeResponseDto.class);
         
@@ -166,7 +154,6 @@ public class ExchangeIntegrationTest {
         assertEquals(new BigDecimal("2500"), response.getExecutedPrice());
         assertEquals(new BigDecimal("12"), response.getToAmount());
         
-        // Verify transaction was saved in the database
         List<ExchangeTransaction> transactions = transactionRepository.findAll();
         assertEquals(1, transactions.size());
         
@@ -179,27 +166,23 @@ public class ExchangeIntegrationTest {
     
     @Test
     void processExchange_InsufficientBalance_ReturnsFailed() throws Exception {
-        // Arrange
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setAccountId(1L);
         request.setFromCurrency("TRY");
         request.setToCurrency("USD");
-        request.setAmount(new BigDecimal("100000")); // Büyük miktar
+        request.setAmount(new BigDecimal("100000")); 
         request.setTransactionType("BUY");
         
-        // Mock exchange rate info
         ExchangeRateInfo rateInfo = new ExchangeRateInfo(
             new BigDecimal("28.5"), OperationType.DIVIDE);
         when(currencyPriceManager.getExchangeRateInfo("TRY", "USD"))
             .thenReturn(rateInfo);
         
-        // Mock insufficient balance response
         BalanceCheckResponseDto balanceResponse = new BalanceCheckResponseDto(false);
         when(rabbitMQListener.getBalanceResponse(anyString(), anyLong()))
             .thenReturn(balanceResponse);
         
-        // Act & Assert
         mockMvc.perform(post("/api/exchange/process")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User", "testUser")
@@ -208,27 +191,24 @@ public class ExchangeIntegrationTest {
                 .andExpect(jsonPath("$.status").value("FAILED"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Exchange failed")));
         
-        // Verify no transaction was saved
         List<ExchangeTransaction> transactions = transactionRepository.findAll();
         assertEquals(0, transactions.size());
     }
     
     @Test
     void processExchange_InvalidCurrency_ReturnsFailed() throws Exception  {
-        // Arrange
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setAccountId(1L);
         request.setFromCurrency("TRY");
-        request.setToCurrency("INVALID"); // Geçersiz para birimi
+        request.setToCurrency("INVALID"); 
         request.setAmount(new BigDecimal("1000"));
         request.setTransactionType("BUY");
         
-        // Mock exchange rate error
         when(currencyPriceManager.getExchangeRateInfo("TRY", "INVALID"))
             .thenThrow(new RuntimeException("Unsupported currency"));
         
-        // Act & Assert
+
         mockMvc.perform(post("/api/exchange/process")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User", "testUser")
@@ -237,14 +217,12 @@ public class ExchangeIntegrationTest {
                 .andExpect(jsonPath("$.status").value("FAILED"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Exchange failed")));
         
-        // Verify no transaction was saved
         List<ExchangeTransaction> transactions = transactionRepository.findAll();
         assertEquals(0, transactions.size());
     }
     
     @Test
     void processExchange_BalanceCheckTimeout_ReturnsFailed() throws Exception  {
-        // Arrange
         ExchangeRequestDto request = new ExchangeRequestDto();
         request.setUsername("testUser");
         request.setAccountId(1L);
@@ -253,17 +231,14 @@ public class ExchangeIntegrationTest {
         request.setAmount(new BigDecimal("1000"));
         request.setTransactionType("BUY");
         
-        // Mock exchange rate info
         ExchangeRateInfo rateInfo = new ExchangeRateInfo(
             new BigDecimal("28.5"), OperationType.DIVIDE);
         when(currencyPriceManager.getExchangeRateInfo("TRY", "USD"))
             .thenReturn(rateInfo);
         
-        // Mock timeout (null response)
         when(rabbitMQListener.getBalanceResponse(anyString(), anyLong()))
             .thenReturn(null);
         
-        // Act & Assert
         mockMvc.perform(post("/api/exchange/process")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("X-User", "testUser")
@@ -272,7 +247,6 @@ public class ExchangeIntegrationTest {
                 .andExpect(jsonPath("$.status").value("FAILED"))
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Exchange failed")));
         
-        // Verify no transaction was saved
         List<ExchangeTransaction> transactions = transactionRepository.findAll();
         assertEquals(0, transactions.size());
     }

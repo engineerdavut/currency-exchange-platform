@@ -1,4 +1,4 @@
-// types/auth.ts
+
 export interface User {
   id?: number;
   username: string;
@@ -28,4 +28,3 @@ export interface AuthState {
   error: string | null;
 }
 
-  

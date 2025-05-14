@@ -14,7 +14,6 @@ import kong.unirest.core.Unirest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-// ExchangeRateAPIManager implementation
 @Component
 public class ExchangeRateAPIManager implements PriceManager {
     private static final Logger logger = LoggerFactory.getLogger(ExchangeRateAPIManager.class);
@@ -26,7 +25,6 @@ public class ExchangeRateAPIManager implements PriceManager {
 
     @Override
     public BigDecimal[] getGoldPrices() throws Exception {
-        // Bu API altın fiyatı sağlamıyor, bu yüzden APILayer'a yönlendir
         throw new UnsupportedOperationException("Gold prices not supported by this provider");
     }
 
@@ -48,23 +46,19 @@ public class ExchangeRateAPIManager implements PriceManager {
     public ExchangeRateInfo getExchangeRateInfo(String fromCurrency, String toCurrency) throws Exception {
         BigDecimal rate = getExchangeRate(fromCurrency, toCurrency);
         
-        // USD/TRY gibi büyük değerli kurlar için çarpma
         if (fromCurrency.equals("USD") && toCurrency.equals("TRY") || 
             fromCurrency.equals("EUR") && toCurrency.equals("TRY") ||
             fromCurrency.equals("GOLD") && toCurrency.equals("TRY")) {
             return new ExchangeRateInfo(rate, OperationType.MULTIPLY);
         }
-        // TRY/USD gibi küçük değerli kurlar için bölme
         else if (toCurrency.equals("USD") && fromCurrency.equals("TRY") || 
                  toCurrency.equals("EUR") && fromCurrency.equals("TRY") ||
                  toCurrency.equals("GOLD") && fromCurrency.equals("TRY")) {
-            // Her zaman büyük değerli kuru kullan (USD/TRY) ve bölme işlemi yap
             return new ExchangeRateInfo(getExchangeRate(toCurrency, fromCurrency), OperationType.DIVIDE);
         }else if ((fromCurrency.equals("USD") && toCurrency.equals("EUR")) || 
             (fromCurrency.equals("EUR") && toCurrency.equals("USD"))) {
             return new ExchangeRateInfo(rate, OperationType.MULTIPLY);
         }
-        // Diğer durumlar için
         else {
             OperationType operation = rate.compareTo(BigDecimal.ONE) > 0 ? 
                 OperationType.MULTIPLY : OperationType.DIVIDE;

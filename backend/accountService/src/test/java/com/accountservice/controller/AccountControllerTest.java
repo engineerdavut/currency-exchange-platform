@@ -35,18 +35,14 @@ public class AccountControllerTest {
 
     @Test
     public void testGetAccountInfo() {
-        // Arrange
         String username = "testUser";
         List<AccountInfoDto> expectedAccounts = Arrays.asList(
-            new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
-            new AccountInfoDto(2L, "USD", new BigDecimal("100"))
-        );
+                new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
+                new AccountInfoDto(2L, "USD", new BigDecimal("100")));
         when(accountService.getAccountInfo(username)).thenReturn(expectedAccounts);
 
-        // Act
         ResponseEntity<List<AccountInfoDto>> response = accountController.getAccountInfo(username);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedAccounts, response.getBody());
         verify(accountService).getAccountInfo(username);
@@ -54,18 +50,14 @@ public class AccountControllerTest {
 
     @Test
     public void testGetWallet() {
-        // Arrange
         String username = "testUser";
         List<AccountInfoDto> expectedWallet = Arrays.asList(
-            new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
-            new AccountInfoDto(2L, "USD", new BigDecimal("100"))
-        );
+                new AccountInfoDto(1L, "TRY", new BigDecimal("1000")),
+                new AccountInfoDto(2L, "USD", new BigDecimal("100")));
         when(walletManager.getWallet(username)).thenReturn(expectedWallet);
 
-        // Act
         ResponseEntity<List<AccountInfoDto>> response = accountController.getWallet(username);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedWallet, response.getBody());
         verify(walletManager).getWallet(username);
@@ -73,16 +65,13 @@ public class AccountControllerTest {
 
     @Test
     public void testDeposit() {
-        // Arrange
         String username = "testUser";
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setCurrencyType("TRY");
         transactionDto.setAmount(new BigDecimal("100"));
-        
-        // Act
+
         ResponseEntity<String> response = accountController.deposit(transactionDto, username);
-        
-        // Assert
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody(), "Response body should not be null");
         assertTrue(response.getBody().contains("Deposit successful"));
@@ -92,16 +81,13 @@ public class AccountControllerTest {
 
     @Test
     public void testWithdraw() {
-        // Arrange
         String username = "testUser";
         TransactionDto transactionDto = new TransactionDto();
         transactionDto.setCurrencyType("TRY");
         transactionDto.setAmount(new BigDecimal("50"));
-        
-        // Act
+
         ResponseEntity<String> response = accountController.withdraw(transactionDto, username);
-        
-        // Assert
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody(), "Response body should not be null");
         assertNotNull(response.getBody());
@@ -110,29 +96,25 @@ public class AccountControllerTest {
         assertEquals(username, transactionDto.getUsername());
     }
 
-
     @Test
     public void testGetRecentTransactions() {
-        // Arrange
+
         String username = "testUser";
         String currencyType = "TRY";
         List<TransactionDto> expectedTransactions = Arrays.asList(
-            createTransactionDto("testUser", "TRY", new BigDecimal("100"), "Deposit"),
-            createTransactionDto("testUser", "TRY", new BigDecimal("50"), "Withdraw")
-        );
+                createTransactionDto("testUser", "TRY", new BigDecimal("100"), "Deposit"),
+                createTransactionDto("testUser", "TRY", new BigDecimal("50"), "Withdraw"));
         when(accountService.getRecentTransactions(username, currencyType)).thenReturn(expectedTransactions);
-        
-        // Act
+
         ResponseEntity<List<TransactionDto>> response = accountController.getRecentTransactions(currencyType, username);
-        
-        // Assert
+
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedTransactions, response.getBody());
         verify(accountService).getRecentTransactions(username, currencyType);
     }
-    
-    // Helper method to create TransactionDto objects
-    private TransactionDto createTransactionDto(String username, String currencyType, BigDecimal amount, String transactionType) {
+
+    private TransactionDto createTransactionDto(String username, String currencyType, BigDecimal amount,
+            String transactionType) {
         TransactionDto dto = new TransactionDto();
         dto.setUsername(username);
         dto.setCurrencyType(currencyType);
@@ -143,16 +125,14 @@ public class AccountControllerTest {
 
     @Test
     public void testCheckBalance() {
-        // Arrange
+
         String username = "testUser";
         String currency = "TRY";
         BigDecimal amount = new BigDecimal("500");
         when(accountService.hasEnoughBalance(username, currency, amount)).thenReturn(true);
 
-        // Act
-        ResponseEntity<Boolean> response = accountController.checkBalance( currency, amount,username);
+        ResponseEntity<Boolean> response = accountController.checkBalance(currency, amount, username);
 
-        // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertTrue(response.getBody());
         verify(accountService).hasEnoughBalance(username, currency, amount);

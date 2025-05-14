@@ -11,7 +11,7 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 
 @Configuration
-public class JwtConfig { // Veya SecurityConfig içine taşıyabilirsin
+public class JwtConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtConfig.class);
 
@@ -20,9 +20,9 @@ public class JwtConfig { // Veya SecurityConfig içine taşıyabilirsin
 
     @Bean
     public SecretKey jwtSecretKey() {
-        // Secret key uzunluğunu kontrol et (HS256 için en az 32 byte)
         if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < 32) {
-            logger.error("accountservise JWT Secret key is too short! Must be at least 256 bits (32 bytes) long for HS256.");
+            logger.error(
+                    "accountservise JWT Secret key is too short! Must be at least 256 bits (32 bytes) long for HS256.");
             throw new IllegalArgumentException("JWT Secret key must be at least 256 bits (32 bytes) long for HS256");
         }
         logger.info("Creating SecretKey bean for accountservise using the provided secret.");

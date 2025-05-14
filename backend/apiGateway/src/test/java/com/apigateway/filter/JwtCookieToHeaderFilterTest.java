@@ -28,7 +28,7 @@ class JwtCookieToHeaderFilterTest {
     private JwtTokenValidator jwtValidator;
 
     @Mock
-    private GatewayFilterChain filterChain; // Bu mock kalacak
+    private GatewayFilterChain filterChain; 
 
     @InjectMocks
     private JwtCookieToHeaderFilter jwtCookieToHeaderFilter;
@@ -36,25 +36,19 @@ class JwtCookieToHeaderFilterTest {
     @Captor
     private ArgumentCaptor<ServerWebExchange> exchangeCaptor;
 
-    // setUp metoduna artık gerek yok, veya sadece temel filterChain mock'u için kalabilir
-    // (ama aşağıdaki gibi her testte özel mocklamak daha iyi)
-    // @BeforeEach
-    // void setUp() {
-    // when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty()); // <-- BU SATIRI KALDIRIN
-    // }
 
     @Test
     void filter_WhenPathIsAuthPath_ShouldSkipValidationAndChain() {
-        // Arrange
+
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/auth/login").build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
-        // Bu testte filterChain.filter çağrılacak, o yüzden burada mock'layalım
+
         when(filterChain.filter(exchange)).thenReturn(Mono.empty());
 
-        // Act
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         verify(jwtValidator, never()).validateAndExtractUser(any());
         verify(filterChain).filter(exchange);
@@ -63,21 +57,21 @@ class JwtCookieToHeaderFilterTest {
 
     @Test
     void filter_WhenValidTokenAndProtectedRoute_ShouldValidateAddHeaderAndChain() {
-        // Arrange
+
         String username = "testUser";
         MockServerHttpRequest request = MockServerHttpRequest.post("/api/exchange/process")
                 .cookie(new HttpCookie("jwt", "valid.token"))
                 .build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
         when(jwtValidator.validateAndExtractUser(request)).thenReturn(username);
-        // Bu testte filterChain.filter çağrılacak (modifiye edilmiş exchange ile)
+
         when(filterChain.filter(any(ServerWebExchange.class))).thenReturn(Mono.empty());
 
 
-        // Act
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         verify(jwtValidator).validateAndExtractUser(request);
         verify(filterChain).filter(exchangeCaptor.capture());
@@ -87,16 +81,15 @@ class JwtCookieToHeaderFilterTest {
 
     @Test
     void filter_WhenNoTokenAndProtectedRoute_ShouldReturnUnauthorized() {
-        // Arrange
+
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/account/wallet").build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
         when(jwtValidator.validateAndExtractUser(request)).thenReturn(null);
-        // Bu testte filterChain.filter ÇAĞRILMAYACAK, o yüzden mocklamaya gerek yok veya never() ile doğrulanabilir.
 
-        // Act
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
         verify(jwtValidator).validateAndExtractUser(request);
@@ -105,17 +98,17 @@ class JwtCookieToHeaderFilterTest {
 
     @Test
     void filter_WhenNoTokenAndPublicPath_ShouldChainWithoutHeader() {
-        // Arrange
+
         MockServerHttpRequest request = MockServerHttpRequest.get("/actuator/health").build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
         when(jwtValidator.validateAndExtractUser(request)).thenReturn(null);
-        // Bu testte filterChain.filter çağrılacak
+
         when(filterChain.filter(exchange)).thenReturn(Mono.empty());
 
-        // Act
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         verify(jwtValidator).validateAndExtractUser(request);
         verify(filterChain).filter(exchange);
@@ -125,19 +118,19 @@ class JwtCookieToHeaderFilterTest {
 
     @Test
     void filter_WhenExpiredTokenAndProtectedRoute_ShouldReturnUnauthorized() {
-        // Arrange
+
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/account/wallet")
                 .cookie(new HttpCookie("jwt", "expired.token"))
                 .build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
-        // Validator'ın null döndüğünü mock'la (exception yerine filter'ın null dönüşünü nasıl ele aldığına odaklanmak için)
-        when(jwtValidator.validateAndExtractUser(request)).thenReturn(null);
-        // Bu testte filterChain.filter ÇAĞRILMAYACAK
 
-        // Act
+        when(jwtValidator.validateAndExtractUser(request)).thenReturn(null);
+
+
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
         verify(jwtValidator).validateAndExtractUser(request);
@@ -146,18 +139,18 @@ class JwtCookieToHeaderFilterTest {
 
     @Test
     void filter_WhenInvalidTokenAndProtectedRoute_ShouldReturnUnauthorized() {
-        // Arrange
+
         MockServerHttpRequest request = MockServerHttpRequest.get("/api/account/wallet")
                 .cookie(new HttpCookie("jwt", "invalid.token"))
                 .build();
         ServerWebExchange exchange = MockServerWebExchange.from(request);
         when(jwtValidator.validateAndExtractUser(request)).thenReturn(null);
-        // Bu testte filterChain.filter ÇAĞRILMAYACAK
 
-        // Act
+
+
         Mono<Void> result = jwtCookieToHeaderFilter.filter(exchange, filterChain);
 
-        // Assert
+
         StepVerifier.create(result).verifyComplete();
         assertEquals(HttpStatus.UNAUTHORIZED, exchange.getResponse().getStatusCode());
         verify(jwtValidator).validateAndExtractUser(request);

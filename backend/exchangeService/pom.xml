@@ -95,8 +95,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
-		<!-- spring-boot-starter-webflux ExchangeService bir MVC uygulamasıysa gereksiz -->
-		<!-- io.projectreactor:reactor-test ExchangeService bir MVC uygulamasıysa gereksiz -->
 	</dependencies>
 
 	<build>

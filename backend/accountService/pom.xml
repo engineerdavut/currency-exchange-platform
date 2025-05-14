@@ -6,15 +6,12 @@
 		<groupId>com.exchangeplatform</groupId>
 		<artifactId>exchangeplatform-banking-parent</artifactId>
 		<version>1.0.0-SNAPSHOT</version>
-		<relativePath>../pom.xml</relativePath> <!-- Bu yol accountService/accountService/pom.xml'den backend/pom.xml'e doğrudur -->
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>accountService</artifactId> <!-- groupId parent'tan gelir -->
+	<artifactId>accountService</artifactId> 
 	<name>accountService</name>
 	<description>Exchange Platform Banking - Account Service</description>
-
-	<!-- Properties parent'tan gelir -->
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -32,8 +29,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!-- Ortak Kütüphane Bağımlılığı -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -95,7 +90,6 @@
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- JUnit 4 (junit:junit) bağımlılığını kaldırın, Spring Boot 3+ JUnit 5 kullanır -->
 	</dependencies>
 
 	<build>
@@ -104,7 +98,6 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
-			<!-- maven-compiler-plugin konfigürasyonu parent'tan gelir -->
 		</plugins>
 	</build>
 </project>

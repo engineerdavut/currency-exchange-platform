@@ -2,7 +2,6 @@ package com.apigateway.filter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -21,7 +20,6 @@ public class JwtCookieToHeaderFilter implements GlobalFilter, Ordered {
     
     private final JwtTokenValidator jwtValidator;
     
-    //@Autowired
     public JwtCookieToHeaderFilter(JwtTokenValidator jwtValidator) {
         this.jwtValidator = jwtValidator;
     }
@@ -31,41 +29,29 @@ public class JwtCookieToHeaderFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         logger.debug("[JwtCookieToHeader] incoming path={}", path);
 
-        // auth endpoint'lerini atla
         if (path.startsWith("/api/auth/")) {
             return chain.filter(exchange);
         }
 
-        // JWT doğrulama ve username çıkarma
         String username = jwtValidator.validateAndExtractUser(exchange.getRequest());
         
         if (username != null) {
             try {
-                // *** DEĞİŞİKLİK BAŞLANGICI ***
                 String encodedUsername = URLEncoder.encode(username, StandardCharsets.UTF_8.toString());
                 logger.debug("[JwtCookieToHeader] Original username: {}, Encoded username for X-User header: {}", username, encodedUsername);
 
                 ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
-                        .header("X-User", encodedUsername) // Encode edilmiş kullanıcı adını ekle
+                        .header("X-User", encodedUsername)
                         .build();
-                // *** DEĞİŞİKLİK SONU ***
                 
                 return chain.filter(exchange.mutate().request(mutatedRequest).build());
 
             } catch (UnsupportedEncodingException e) {
-                // Bu hata StandardCharsets.UTF_8 ile normalde oluşmaz
                 logger.error("[JwtCookieToHeader] Error URL encoding username: {}", username, e);
-                // Hata durumunda 500 döndürmek veya isteği reddetmek daha güvenli olabilir.
-                // Şimdilik isteği olduğu gibi devam ettiriyoruz ama bu, karakter bozulmasına neden olabilir.
-                // Daha iyi bir yaklaşım:
-                // exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-                // return exchange.getResponse().setComplete();
-                // VEYA sadece logla ve devam et (şu anki davranış):
                 return chain.filter(exchange); 
             }
         }
         
-        // Korumalı yol ve geçerli token yoksa 401 dön
         if (isProtectedPath(path)) {
             logger.warn("[JwtCookieToHeader] Protected path {} accessed without valid JWT. Responding with UNAUTHORIZED.", path);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);

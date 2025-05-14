@@ -1,7 +1,6 @@
-// components/transactions/TransactionItem.tsx
-import React from 'react';
-import { formatDate } from '../../utils/formatDate';
-import { formatCurrency } from '../../utils/formatCurrency';
+import React from "react";
+import { formatDate } from "../../utils/formatDate";
+import { formatCurrency } from "../../utils/formatCurrency";
 
 interface TransactionItemProps {
   id: number;
@@ -23,23 +22,28 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   transactionType,
   fromCurrency,
   toCurrency,
-  className = ''
+  className = "",
 }) => {
-  const amountColor = transactionType === 'DEPOSIT' || transactionType === 'EXCHANGE_IN' 
-    ? 'text-green-600' : 'text-red-600';
-  
+  const amountColor =
+    transactionType === "DEPOSIT" || transactionType === "EXCHANGE_IN"
+      ? "text-green-600"
+      : "text-red-600";
+
   const displayType = () => {
-    if (transactionType === 'EXCHANGE') {
+    if (transactionType === "EXCHANGE") {
       return `Exchange: ${fromCurrency} → ${toCurrency}`;
-    } else if (transactionType === 'EXCHANGE_IN') {
+    } else if (transactionType === "EXCHANGE_IN") {
       return `Received from ${fromCurrency}`;
-    } else if (transactionType === 'EXCHANGE_OUT') {
+    } else if (transactionType === "EXCHANGE_OUT") {
       return `Converted to ${toCurrency}`;
     } else {
-      return transactionType.charAt(0).toUpperCase() + transactionType.slice(1).toLowerCase();
+      return (
+        transactionType.charAt(0).toUpperCase() +
+        transactionType.slice(1).toLowerCase()
+      );
     }
   };
-  
+
   return (
     <div className={`p-4 bg-white rounded-lg shadow border mb-3 ${className}`}>
       <div className="flex justify-between items-center">
@@ -52,7 +56,9 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
         </div>
         <div className="text-right">
           <p className={`font-semibold ${amountColor}`}>
-            {transactionType === 'DEPOSIT' || transactionType === 'EXCHANGE_IN' ? '+' : '-'}
+            {transactionType === "DEPOSIT" || transactionType === "EXCHANGE_IN"
+              ? "+"
+              : "-"}
             {formatCurrency(Math.abs(amount), currencyType)}
           </p>
           <p className="text-sm text-gray-500">{currencyType}</p>

@@ -15,12 +15,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // API Gateway arkasında genellikle gereksiz
+            .csrf(csrf -> csrf.disable()) 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/**").permitAll() // Opsiyonel: Actuator endpointleri varsa
-                .anyRequest().permitAll() // <<< API Gateway'e güvendiğimiz için TÜM istekleri kabul et
+                .requestMatchers("/actuator/**").permitAll() 
+                .anyRequest().permitAll() 
             )
-            // Backend servisler genellikle state'sizdir
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

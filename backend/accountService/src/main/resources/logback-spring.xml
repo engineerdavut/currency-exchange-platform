@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <!-- Spring Boot'nun temel logback konfigürasyonunu dahil et -->
     <include resource="org/springframework/boot/logging/logback/base.xml"/>
-    
-    <!-- Account Service için özel loglama -->
     <logger name="com.accountservice" level="DEBUG"/>
-    
-
-
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>logs/account-service.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">

@@ -10,20 +10,18 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Exchange ve kuyruk isimleri
     public static final String BALANCE_CHECK_QUEUE = "balance-check-queue";
     public static final String BALANCE_CHECK_EXCHANGE = "balance-check-exchange";
     public static final String BALANCE_CHECK_ROUTING_KEY = "balance.check";
-    
+
     public static final String BALANCE_UPDATE_QUEUE = "balance-update-queue";
     public static final String BALANCE_UPDATE_EXCHANGE = "balance-update-exchange";
     public static final String BALANCE_UPDATE_ROUTING_KEY = "balance.update";
-    
+
     public static final String BALANCE_RESPONSE_QUEUE = "balance-response-queue";
     public static final String BALANCE_RESPONSE_EXCHANGE = "balance-response-exchange";
     public static final String BALANCE_RESPONSE_ROUTING_KEY = "balance.response";
 
-    // Bakiye kontrolü için kuyruk ve exchange tanımları
     @Bean
     public Queue balanceCheckQueue() {
         return new Queue(BALANCE_CHECK_QUEUE, true);
@@ -40,8 +38,7 @@ public class RabbitMQConfig {
                 .to(balanceCheckExchange())
                 .with(BALANCE_CHECK_ROUTING_KEY);
     }
-    
-    // Bakiye güncellemesi için kuyruk ve exchange tanımları
+
     @Bean
     public Queue balanceUpdateQueue() {
         return new Queue(BALANCE_UPDATE_QUEUE, true);
@@ -58,8 +55,7 @@ public class RabbitMQConfig {
                 .to(balanceUpdateExchange())
                 .with(BALANCE_UPDATE_ROUTING_KEY);
     }
-    
-    // Bakiye cevabı için kuyruk ve exchange tanımları
+
     @Bean
     public Queue balanceResponseQueue() {
         return new Queue(BALANCE_RESPONSE_QUEUE, true);
@@ -77,7 +73,6 @@ public class RabbitMQConfig {
                 .with(BALANCE_RESPONSE_ROUTING_KEY);
     }
 
-    // JSON dönüşümü için converter
     @Bean
     public Jackson2JsonMessageConverter converter() {
         return new Jackson2JsonMessageConverter();
@@ -90,4 +85,3 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 }
-

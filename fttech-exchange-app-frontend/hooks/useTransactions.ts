@@ -3,7 +3,6 @@ import { Transaction } from '../types/transaction';
 import { transactionApi } from '../lib/api';
 
 
-// API'den gelen veri tipini tanımlıyoruz
 interface ApiTransactionResponse {
   transactionId: string;
   accountId: string;
@@ -28,12 +27,11 @@ export const useTransactions = (currencyType?: string) => {
 
       try {
         const response = await transactionApi.getTransactions(currencyType);
-        
+
         const formattedTransactions: Transaction[] = response.data.map((apiTransaction: ApiTransactionResponse) => {
-          // String değerleri number'a dönüştürüyoruz
           const transactionId = parseInt(apiTransaction.transactionId, 10);
           const accountId = parseInt(apiTransaction.accountId, 10);
-          
+
           let transaction: Transaction = {
             ...apiTransaction,
             transactionId,
@@ -41,15 +39,14 @@ export const useTransactions = (currencyType?: string) => {
             fromCurrency: undefined,
             toCurrency: undefined
           };
-          
-          // Eğer işlem bir exchange ise
+
           if (apiTransaction.description.includes('Exchange')) {
             const isIncoming = apiTransaction.amount > 0;
-            
+
             const match = apiTransaction.description.match(/from (\w+) to (\w+)/i);
             const fromCurrency = match ? match[1] : undefined;
             const toCurrency = match ? match[2] : undefined;
-            
+
             transaction = {
               ...transaction,
               transactionType: isIncoming ? 'EXCHANGE_IN' : 'EXCHANGE_OUT',
@@ -57,10 +54,10 @@ export const useTransactions = (currencyType?: string) => {
               toCurrency
             };
           }
-          
+
           return transaction;
         });
-        
+
         setTransactions(formattedTransactions);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch transactions');

@@ -12,20 +12,12 @@ import com.exchangeservice.messaging.RabbitMQListener;
 @SpringBootTest
 @ActiveProfiles("test")
 class ExchangeServiceApplicationTests {
-    @MockitoBean(name = "APILayerManager") // veya @Qualifier ile aynı isim
+    @MockitoBean(name = "APILayerManager") 
     private PriceManager apiLayerManagerMock;
 
-    // Eğer ExchangeService @Qualifier("exchangeRateAPIManager") PriceManager alıyorsa:
-    @MockitoBean(name = "exchangeRateAPIManager") // veya @Qualifier ile aynı isim
+    @MockitoBean(name = "exchangeRateAPIManager") 
     private PriceManager exchangeRateAPIManagerMock;
 
-    // Eğer CollectApiPriceManager da bir bean ise ve sorun çıkarıyorsa
-    // (önceki çözümde bu sorunu çözdüğümüzü varsayıyorum,
-    // yani CollectApiPriceManager'daki @Value'lar artık ${api.collectapi.key} gibi):
-    // @MockBean(name = "collectApiPriceManager")
-    // private PriceManager collectApiPriceManagerMock; // Veya CollectApiPriceManager tipiyle
-
-    // ExchangeService'in diğer bağımlılıkları (RabbitMQ vs.) varsa onlar da mock'lanabilir
     @MockitoBean
     private RabbitTemplate rabbitTemplateMock;
 

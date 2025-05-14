@@ -44,7 +44,6 @@ public class CollectApiPriceManager {
             JSONArray resultArray = jsonResponse.getJSONArray("result");
             for (int i = 0; i < resultArray.length(); i++) {
                 JSONObject item = resultArray.getJSONObject(i);
-                // Gram Altın veya benzer isimli bir altın türünü ara
                 if (item.getString("name").equals("Gram Altın")) {
                     BigDecimal buy;
                     BigDecimal sell;
@@ -76,14 +75,12 @@ public class CollectApiPriceManager {
                 }
             }
             
-            // Gram altın bulunamadıysa varsayılan değerler kullan
             BigDecimal defaultBuy = new BigDecimal("2000.00");
             BigDecimal defaultSell = new BigDecimal("2040.00");
             logger.warn("Gram Altın not found in response, using default values - Buy: {}, Sell: {}", defaultBuy, defaultSell);
             return new BigDecimal[]{defaultBuy, defaultSell};
         } catch (Exception e) {
             logger.error("Error fetching gold price", e);
-            // Hata durumunda varsayılan değerler kullan
             BigDecimal defaultBuy = new BigDecimal("2000.00");
             BigDecimal defaultSell = new BigDecimal("2040.00");
             logger.warn("Using default gold prices due to error - Buy: {}, Sell: {}", defaultBuy, defaultSell);
@@ -94,28 +91,23 @@ public class CollectApiPriceManager {
 
     public BigDecimal getExchangeRate(String fromCurrency, String toCurrency) {
         try {
-            // Altın ile ilgili işlemler için özel mantık
             if (fromCurrency.equals("GOLD") || toCurrency.equals("GOLD")) {
                 return handleGoldExchangeRate(fromCurrency, toCurrency);
             }
             
-            // Normal para birimleri için mevcut mantık
             BigDecimal directRate = fetchDirectExchangeRate(fromCurrency, toCurrency);
             BigDecimal inverseRate = null;
             
-            // Ters yönde kur değerini de al
             try {
                 BigDecimal fetchedInverseRate = fetchDirectExchangeRate(toCurrency, fromCurrency);
-                // Ters çevir
+
                 inverseRate = BigDecimal.ONE.divide(fetchedInverseRate, 6, RoundingMode.HALF_UP);
                 logger.info("Calculated inverse rate from {} to {}: {}", fromCurrency, toCurrency, inverseRate);
             } catch (Exception e) {
                 logger.warn("Could not fetch inverse rate, will use direct rate only: {}", e.getMessage());
             }
             
-            // Her iki oran da alındıysa, büyük değerli olanı seç
             if (directRate != null && inverseRate != null) {
-                // 1'den büyük olanı seç
                 if (directRate.compareTo(BigDecimal.ONE) > 0 && inverseRate.compareTo(BigDecimal.ONE) < 0) {
                     logger.info("Using direct rate {} as it's larger than 1", directRate);
                     return directRate.setScale(4, RoundingMode.HALF_UP);
@@ -123,7 +115,6 @@ public class CollectApiPriceManager {
                     logger.info("Using inverse rate {} as it's larger than 1", inverseRate);
                     return inverseRate.setScale(4, RoundingMode.HALF_UP);
                 } else {
-                    // Her ikisi de 1'den büyük veya küçükse, mutlak değeri büyük olanı seç
                     if (directRate.abs().compareTo(inverseRate.abs()) >= 0) {
                         logger.info("Using direct rate {} as it has larger absolute value", directRate);
                         return directRate.setScale(4, RoundingMode.HALF_UP);
@@ -138,7 +129,6 @@ public class CollectApiPriceManager {
                 throw new RuntimeException("Failed to fetch the primary exchange rate.");
            }
            logger.info("Using direct rate {} as final rate", directRate);
-            // Sadece directRate varsa onu kullan
             return directRate.setScale(4, RoundingMode.HALF_UP);
         } catch (Exception e) {
             logger.error("Error calculating exchange rate from {} to {}", fromCurrency, toCurrency, e);
@@ -148,30 +138,22 @@ public class CollectApiPriceManager {
     
     private BigDecimal handleGoldExchangeRate(String fromCurrency, String toCurrency) {
         try {
-            // Altın fiyatlarını çek
             BigDecimal[] goldPrices = fetchGoldPrice();
-            BigDecimal buyPrice = goldPrices[0]; // Alış fiyatı
-            BigDecimal sellPrice = goldPrices[1]; // Satış fiyatı
+            BigDecimal buyPrice = goldPrices[0]; 
+            BigDecimal sellPrice = goldPrices[1]; 
             
             logger.info("Using gold prices - Buy: {}, Sell: {}", buyPrice, sellPrice);
             
             if (fromCurrency.equals("GOLD") && toCurrency.equals("TRY")) {
-                // Altın satışı (GOLD -> TRY): Altın alış fiyatını kullan
                 return buyPrice.setScale(4, RoundingMode.HALF_UP);
             } else if (fromCurrency.equals("TRY") && toCurrency.equals("GOLD")) {
-                // Altın alımı (TRY -> GOLD): Altın satış fiyatını doğrudan kullan
                 return sellPrice.setScale(4, RoundingMode.HALF_UP);
             } else if (fromCurrency.equals("GOLD")) {
-                // GOLD -> Diğer para birimleri (örn: GOLD -> USD)
-                // Önce GOLD -> TRY, sonra TRY -> hedef para birimi
                 BigDecimal goldToTry = buyPrice;
                 BigDecimal tryToTarget = getExchangeRate("TRY", toCurrency);
                 return goldToTry.divide(tryToTarget, 6, RoundingMode.HALF_UP).setScale(4, RoundingMode.HALF_UP);
             } else {
-                // Diğer para birimleri -> GOLD (örn: USD -> GOLD)
-                // Önce kaynak para birimi -> TRY, sonra TRY -> GOLD
                 BigDecimal sourceToTry = getExchangeRate(fromCurrency, "TRY");
-                // TRY miktarını altın satış fiyatına böl
                 return sourceToTry.divide(sellPrice, 6, RoundingMode.HALF_UP).setScale(4, RoundingMode.HALF_UP);
             }
         } catch (Exception e) {

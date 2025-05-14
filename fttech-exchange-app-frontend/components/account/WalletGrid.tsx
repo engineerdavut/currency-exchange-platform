@@ -1,6 +1,6 @@
-import React from 'react';
-import { WalletItem } from '../../types/account';
-import { AccountCard } from './AccountCard';
+import React from "react";
+import { WalletItem } from "../../types/account";
+import { AccountCard } from "./AccountCard";
 
 interface WalletGridProps {
   wallet: WalletItem[];
@@ -8,10 +8,10 @@ interface WalletGridProps {
   onWithdraw: (currencyType: string) => void;
 }
 
-export const WalletGrid: React.FC<WalletGridProps> = ({ 
-  wallet, 
-  onDeposit, 
-  onWithdraw 
+export const WalletGrid: React.FC<WalletGridProps> = ({
+  wallet,
+  onDeposit,
+  onWithdraw,
 }) => {
   if (wallet.length === 0) {
     return (

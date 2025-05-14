@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
     List<Transaction> findTop5ByAccountOrderByTimestampDesc(Account account);
+
     @Query("SELECT t FROM Transaction t WHERE t.account.user.username = :username ORDER BY t.timestamp DESC")
     List<Transaction> findRecentTransactionsByUsername(@Param("username") String username, Pageable pageable);
 }

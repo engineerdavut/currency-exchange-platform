@@ -23,7 +23,6 @@ class ExchangeTransactionRepositoryTest {
 
     @Test
     void saveAndFindById_Success() {
-        // Arrange
         ExchangeTransaction transaction = new ExchangeTransaction();
         transaction.setAccountId(1L);
         transaction.setFromCurrency("TRY");
@@ -33,14 +32,12 @@ class ExchangeTransactionRepositoryTest {
         transaction.setTransactionType("BUY");
         transaction.setTimestamp(LocalDateTime.now());
         
-        // Act
         ExchangeTransaction savedTransaction = repository.save(transaction);
         entityManager.flush();
         entityManager.clear();
         
         Optional<ExchangeTransaction> foundTransaction = repository.findById(savedTransaction.getId());
         
-        // Assert
         assertTrue(foundTransaction.isPresent());
         assertEquals(1L, foundTransaction.get().getAccountId());
         assertEquals("TRY", foundTransaction.get().getFromCurrency());

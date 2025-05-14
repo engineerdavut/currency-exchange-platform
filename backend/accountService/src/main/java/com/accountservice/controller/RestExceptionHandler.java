@@ -10,6 +10,6 @@ public class RestExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<String> handleAuthEx(AuthenticationException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                             .body("{\"error\":\""+ ex.getMessage() +"\"}");
+                .body("{\"error\":\"" + ex.getMessage() + "\"}");
     }
 }

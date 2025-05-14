@@ -1,4 +1,4 @@
-// src/store/authSlice.ts
+
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios, { AxiosError } from 'axios';
 import { authApi } from '../lib/api';
@@ -32,10 +32,10 @@ export const checkAuthStatus = createAsyncThunk<
         return rejectWithValue('Inconsistent auth state.');
       }
     } catch (error) {
-      const err = error as AxiosError | Error; // Daha iyi tipleme
+      const err = error as AxiosError | Error;
       console.log('Auth status check via API failed:', err.message || err);
       clearStoredUsername();
-      if (axios.isAxiosError(error)) { // AxiosError kontrolü
+      if (axios.isAxiosError(error)) {
         return rejectWithValue(error.response?.status === 401 ? 'User not authenticated (401)' : 'API check auth request failed');
       }
       return rejectWithValue('API check auth request failed');
@@ -63,7 +63,7 @@ export const login = createAsyncThunk<
         return rejectWithValue('Login failed: Username not received.');
       }
     } catch (error) {
-      const err = error as AxiosError<unknown> | Error; // Daha spesifik response data tipi için 'any' yerine bir interface tanımlanabilir
+      const err = error as AxiosError<unknown> | Error;
       console.error('Login API call failed:', err);
       let message = 'Login request failed';
       if (axios.isAxiosError(error)) {
@@ -99,14 +99,14 @@ export const register = createAsyncThunk<
         return rejectWithValue('Registration successful but response format is unexpected.');
       }
     } catch (error) {
-      const err = error as AxiosError<unknown> | Error; // Daha spesifik response data tipi için 'any' yerine bir interface tanımlanabilir
+      const err = error as AxiosError<unknown> | Error;
       console.error('Register API call failed:', err);
       let message = 'Registration failed';
       if (axios.isAxiosError(error)) {
         message = error.response?.data?.error ||
-                  error.response?.data?.message ||
-                  (typeof error.response?.data === 'string' ? error.response.data : null) ||
-                  error.message;
+          error.response?.data?.message ||
+          (typeof error.response?.data === 'string' ? error.response.data : null) ||
+          error.message;
       } else if (error instanceof Error) {
         message = error.message;
       }
@@ -149,11 +149,11 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.error = null;
       })
-      .addCase(checkAuthStatus.rejected, (state, action) => { // action burada kullanılıyor
+      .addCase(checkAuthStatus.rejected, (state, action) => {
         state.isLoading = false;
         state.user = null;
         state.isAuthenticated = false;
-        state.error = action.payload as string || null; // Hata mesajını state'e yazalım
+        state.error = action.payload as string || null;
         console.log("Check auth rejected in reducer:", action.payload);
       })
       .addCase(login.pending, (state) => {
@@ -173,31 +173,30 @@ const authSlice = createSlice({
         state.error = action.payload as string;
       })
       .addCase(register.pending, (state) => {
-         state.isLoading = true;
-         state.error = null;
+        state.isLoading = true;
+        state.error = null;
       })
-      .addCase(register.fulfilled, (state) => { // state burada kullanılıyor
-         state.isLoading = false;
+      .addCase(register.fulfilled, (state) => {
+        state.isLoading = false;
       })
       .addCase(register.rejected, (state, action) => {
-         state.isLoading = false;
-         state.error = action.payload as string;
+        state.isLoading = false;
+        state.error = action.payload as string;
       })
-      .addCase(logout.pending, (state) => { // state burada kullanılıyor (opsiyonel olarak isLoading set edilebilir)
-        state.isLoading = true; // Örneğin logout sırasında da loading gösterebiliriz
-       })
+      .addCase(logout.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(logout.fulfilled, (state) => {
         state.user = null;
         state.isAuthenticated = false;
         state.isLoading = false;
         state.error = null;
       })
-      .addCase(logout.rejected, (state, action) => { // action burada kullanılabilir (hata loglamak/göstermek için)
-        // API hatası olsa bile client state'i temizlenmeli
+      .addCase(logout.rejected, (state, action) => {
         state.user = null;
         state.isAuthenticated = false;
         state.isLoading = false;
-        state.error = action.payload as string; // Opsiyonel: API hatasını göstermek isterseniz
+        state.error = action.payload as string;
       });
   },
 });
