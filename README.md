@@ -329,7 +329,7 @@ Distributed under the MIT License. See `LICENSE.txt` in the repository for more 
 *   The developers and maintainers of Next.js, React, and the broader JavaScript frontend ecosystem.
 *   Providers of the external APIs (API Layer, ExchangeRate-API) used for sourcing mock data.
 *   The creators of essential tools like Docker, Nginx, PostgreSQL, and RabbitMQ.
-*   *(Any other specific libraries, tools, or individuals you wish to thank)*
+
 
 ## AI Tools Used
 
